@@ -1,6 +1,14 @@
-# Updated fork of TPC & QuickFix for TruckersMP
+# TPC & QuickFix for TruckersMP
+
+This fork is planned to be a long-term project with a lot of new features and improvements.
 
 Teleport to anywhere. Fix trucks at anywhere.
+
+## Features
+
+- Automatically repair your truck & trailer
+- Teleport anywhere on the map using the save coordinates feature (`Alt+F12`)
+- A lot more features to come soon™️
 
 ## Compability
 
@@ -8,18 +16,13 @@ ETS2 and ATS on Windows x64
 
 ## Download
 
-<https://github.com/djohts/tpc-truckersmp/releases/latest>
+Latest release: <https://github.com/djohts/tpc-truckersmp/releases/latest>
 
 ## How to Use
 
-- Preparation: Type `g_debug_camera 1` in [console](https://forum.scssoft.com/viewtopic.php?t=61852) (only once)
-- Step 1: Press Alt+F12 to save the coordinates of [freecam](https://steamcommunity.com/sharedfiles/filedetails/?id=171359712)
-- Step 2: Make a quicksave in game and reload it 5 seconds later
-
-## Changelog
-
-- Remove refueling
-- Auto attach the trailer when it's detached
+1. Type `g_debug_camera 1` in [console](https://forum.scssoft.com/viewtopic.php?t=61852) **(required only once)**
+2. Press Alt+F12 to save the coordinates of current freecam position
+3. Make a quicksave in game and reload it 1-2 seconds later
 
 ## License
 

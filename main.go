@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"git.tcp.direct/kayos/sendkeys"
 	"github.com/fsnotify/fsnotify"
 	"golang.org/x/sys/windows/registry"
 )
@@ -23,6 +25,7 @@ const (
 var (
 	profileList   []string
 	watchPathList []string
+	keyboard      *sendkeys.KBWrap
 )
 
 func main() {
@@ -30,17 +33,32 @@ func main() {
 		handleError(errors.New("SII_Decrypt.exe does not exist"))
 	}
 
-	err := addDocumentsPathToWatchList()
-	handleError(err)
-	addProfilePathToWatchList()
-
 	fmt.Println("================= TPC For TruckersMP =================")
-	fmt.Println("Usage: 0.Type g_debug_camera 1 in console (only once)")
-	fmt.Println("       1.Alt+F12 to save coordinate of freecam")
-	fmt.Println("       2.Make a quicksave & reload 5 seconds later")
-	fmt.Println("Email: sunwinbus@ets666.com | Discord: sunwinbus#1343")
-	fmt.Println("Thanks to DF-41 for his great idea!")
+	fmt.Println("Usage: 0. Type g_debug_camera 1 in console (only once)")
+	fmt.Println("       1. Alt+F12 to save coordinate of freecam")
+	fmt.Println("       2. Make a quicksave & reload 1-2 seconds later")
 	fmt.Println("======================================================")
+
+	err := initConfig()
+	handleError(err)
+
+	if config.Auto && config.Keybinds.Quicksave == "" {
+		handleError(errors.New("set keybinds.quicksave in config.yaml to use auto mode"))
+	}
+
+	if config.Auto {
+		err := addCamsWatchers()
+		handleError(err)
+
+		keyboard, err = sendkeys.NewKBWrapWithOptions()
+		handleError(err)
+	}
+	err = getProfileList()
+	handleError(err)
+	if len(profileList) == 0 {
+		handleError(errors.New("no local profiles found"))
+	}
+	addSaveWatchers()
 
 	watch, err := fsnotify.NewWatcher()
 	handleError(err)
@@ -49,7 +67,7 @@ func main() {
 	err = addPathToWatch(watch)
 	handleError(err)
 
-	go watchQuicksave(watch)
+	go watchFiles(watch)
 	select {}
 }
 
@@ -75,40 +93,30 @@ func getDocumentsPath() (string, error) {
 }
 
 // Detect if game profiles are exist
-func addDocumentsPathToWatchList() error {
+func addCamsWatchers() error {
 	documentsPath, err := getDocumentsPath()
 	if err != nil {
 		return err
 	}
-	if ets2ProfilePath := filepath.Join(documentsPath, ETS, `profiles`); isDir(ets2ProfilePath) {
-		err = getProfileList(ets2ProfilePath)
-		if err != nil {
-			return err
-		}
-		watchPathList = append(watchPathList, ets2ProfilePath)
+	if ets2Path := filepath.Join(documentsPath, ETS); isDir(ets2Path) {
+		watchPathList = append(watchPathList, filepath.Join(ets2Path, `cams.txt`))
 	}
-	if atsProfilePath := filepath.Join(documentsPath, ATS, `profiles`); isDir(atsProfilePath) {
-		err = getProfileList(atsProfilePath)
-		if err != nil {
-			return err
-		}
-		watchPathList = append(watchPathList, atsProfilePath)
+	if atsPath := filepath.Join(documentsPath, ATS); isDir(atsPath) {
+		watchPathList = append(watchPathList, filepath.Join(atsPath, `cams.txt`))
 	}
 	return nil
 }
 
-func addProfilePathToWatchList() {
+func addSaveWatchers() {
 	for _, profilePath := range profileList {
 		if isDir(filepath.Join(profilePath, `save`)) {
 			watchPathList = append(watchPathList, filepath.Join(profilePath, `save`))
-		} else {
-			watchPathList = append(watchPathList, profilePath)
 		}
 	}
 	profileList = profileList[0:0]
 }
 
-func listProfiles(path string, f os.FileInfo, err error) error {
+func listProfiles(path string, f fs.DirEntry, err error) error {
 	if f == nil {
 		return err
 	}
@@ -118,34 +126,50 @@ func listProfiles(path string, f os.FileInfo, err error) error {
 	return nil
 }
 
-func getProfileList(path string) error {
-	err := filepath.Walk(path, listProfiles)
+func getProfileList() error {
+	ets2Path, err := getEts2Path()
 	if err != nil {
 		return err
 	}
+	err = filepath.WalkDir(ets2Path, listProfiles)
+	if err != nil {
+		return err
+	}
+
+	atsPath, err := getAtsPath()
+	if err != nil {
+		return err
+	}
+	err = filepath.WalkDir(atsPath, listProfiles)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func isFile(path string) bool {
-	s, err := os.Stat(path)
+func getEts2Path() (string, error) {
+	documentsPath, err := getDocumentsPath()
 	if err != nil {
-		return false
+		return "", err
 	}
-	if s.IsDir() {
-		return false
+	ets2Path := filepath.Join(documentsPath, ETS)
+	if isDir(ets2Path) {
+		return ets2Path, nil
 	}
-	return true
+	return "", errors.New("ETS2 not found")
 }
 
-func isDir(path string) bool {
-	s, err := os.Stat(path)
+func getAtsPath() (string, error) {
+	documentsPath, err := getDocumentsPath()
 	if err != nil {
-		return false
+		return "", err
 	}
-	if s.IsDir() {
-		return true
+	atsPath := filepath.Join(documentsPath, ATS)
+	if isDir(atsPath) {
+		return atsPath, nil
 	}
-	return false
+	return "", errors.New("ATS not found")
 }
 
 func decryptSii(filePath string) (bool, error) {
@@ -205,46 +229,23 @@ func addPathToWatch(watch *fsnotify.Watcher) error {
 	return nil
 }
 
-func watchQuicksave(watch *fsnotify.Watcher) {
+func watchFiles(watch *fsnotify.Watcher) {
 	for {
 		select {
 		case ev := <-watch.Events:
 			{
-				if ev.Op&fsnotify.Create == fsnotify.Create {
-					if filepath.Base(ev.Name) == `quicksave` {
-						time.Sleep(3 * time.Second)
-						done, err := flushChange(filepath.Join(ev.Name, `game.sii`))
-						handleError(err)
-						if done {
-							fmt.Println("Updated: " + filepath.Join(ev.Name, `game.sii`))
-						}
-					} else if filepath.Base(ev.Name) == `profiles` && filepath.Base(filepath.Dir(ev.Name)) == `remote` {
-						err := watch.Add(ev.Name)
-						handleError(err)
-						fmt.Println("Monitoring: " + ev.Name)
-						err = getProfileList(ev.Name)
-						handleError(err)
-						for _, profilePath := range profileList {
-							err = watch.Add(profilePath)
-							handleError(err)
-						}
-					} else if isDir(ev.Name) && filepath.Base(filepath.Dir(ev.Name)) == `profiles` {
-						err := watch.Add(ev.Name)
-						handleError(err)
-					} else if filepath.Base(ev.Name) == `save` {
-						err := watch.Add(ev.Name)
-						handleError(err)
-						fmt.Println("Monitoring: " + ev.Name)
-					}
-				}
 				if ev.Op&fsnotify.Write == fsnotify.Write {
 					if filepath.Base(ev.Name) == `quicksave` {
-						time.Sleep(3 * time.Second)
+						time.Sleep(1 * time.Second)
 						done, err := flushChange(filepath.Join(ev.Name, `game.sii`))
 						handleError(err)
 						if done {
 							fmt.Println("Updated: " + filepath.Join(ev.Name, `game.sii`))
 						}
+					} else if filepath.Base(ev.Name) == `cams.txt` {
+						err := keyboard.Type(config.Keybinds.Quicksave)
+						handleError(err)
+						fmt.Println("Detected cams.txt update, sending quicksave keybind")
 					}
 				}
 			}
@@ -294,10 +295,6 @@ func flushChange(filePath string) (bool, error) {
 
 	if len(cams) > 0 {
 		location, rotation := parseCamsCoordinate(cams)
-		if err != nil {
-			return false, err
-		}
-
 		output, err := editSii(sii, location, rotation)
 		if err != nil {
 			return false, err
@@ -343,17 +340,31 @@ func editSii(siiArray []string, location string, rotation string) (string, error
 			siiArray[i] = strings.Split(siiArray[i], `: `)[0] + `: (0, 0, 0) (` + rotation + `)`
 		} else if strings.HasPrefix(siiArray[i], " trailer_body_wear:") {
 			siiArray[i] = " trailer_body_wear: 0"
+		} else if strings.HasPrefix(siiArray[i], " trailer_body_wear_unfixable:") {
+			siiArray[i] = " trailer_body_wear_unfixable: 0"
 		} else if strings.HasPrefix(siiArray[i], " chassis_wear:") {
 			siiArray[i] = " chassis_wear: 0"
+		} else if strings.HasPrefix(siiArray[i], " chassis_wear_unfixable:") {
+			siiArray[i] = " chassis_wear_unfixable: 0"
 		} else if strings.HasPrefix(siiArray[i], " engine_wear:") {
 			siiArray[i] = " engine_wear: 0"
+		} else if strings.HasPrefix(siiArray[i], " engine_wear_unfixable:") {
+			siiArray[i] = " engine_wear_unfixable: 0"
 		} else if strings.HasPrefix(siiArray[i], " transmission_wear:") {
 			siiArray[i] = " transmission_wear: 0"
+		} else if strings.HasPrefix(siiArray[i], " transmission_wear_unfixable:") {
+			siiArray[i] = " transmission_wear_unfixable: 0"
 		} else if strings.HasPrefix(siiArray[i], " cabin_wear:") {
 			siiArray[i] = " cabin_wear: 0"
+		} else if strings.HasPrefix(siiArray[i], " cabin_wear_unfixable:") {
+			siiArray[i] = " cabin_wear_unfixable: 0"
 		} else if strings.HasPrefix(siiArray[i], " wheels_wear:") {
 			siiArray[i] = " wheels_wear: 0"
+		} else if strings.HasPrefix(siiArray[i], " wheels_wear_unfixable:") {
+			siiArray[i] = " wheels_wear_unfixable: 0"
 		} else if strings.HasPrefix(siiArray[i], " wheels_wear[") {
+			siiArray[i] = ""
+		} else if strings.HasPrefix(siiArray[i], " wheels_wear_unfixable[") {
 			siiArray[i] = ""
 		}
 	}
