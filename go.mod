@@ -6,7 +6,7 @@ require (
 	git.tcp.direct/kayos/sendkeys v0.0.0-20211216174833-565f782ccf21
 	github.com/creasty/defaults v1.7.0
 	github.com/fsnotify/fsnotify v1.7.0
-	golang.org/x/sys v0.19.0
+	golang.org/x/sys v0.20.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
