@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0 (2024-05-06)
+
+- Improved logging
+- Code cleanup and optimizations
+- Updated dependencies
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.0.1...v2.1.0
+
 ## 2.0.1 (2024-05-01)
 
 - Updated dependencies
