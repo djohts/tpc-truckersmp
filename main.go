@@ -15,6 +15,8 @@ import (
 	"git.tcp.direct/kayos/sendkeys"
 	"github.com/bradhe/stopwatch"
 	"github.com/charmbracelet/log"
+	"github.com/djohts/tpc-truckersmp/config"
+	"github.com/djohts/tpc-truckersmp/utils"
 	"github.com/fsnotify/fsnotify"
 	"golang.org/x/sys/windows/registry"
 )
@@ -34,7 +36,7 @@ var (
 )
 
 func main() {
-	if !isFile("SII_Decrypt.exe") {
+	if !utils.IsFile("SII_Decrypt.exe") {
 		handleError(errors.New("SII_Decrypt.exe does not exist"))
 	}
 
@@ -44,23 +46,23 @@ func main() {
 	log.Info("       2. Make a quicksave & reload 1-2 seconds later")
 	log.Info("======================================================")
 
-	err := initConfig()
+	err := config.Init()
 	handleError(err)
 
 	documents, err := getDocumentsPath()
 	handleError(err)
 	documentsPath = documents
 
-	if config.Debug {
+	if config.Get().Debug {
 		log.SetReportCaller(true)
 		log.SetLevel(log.DebugLevel)
 	}
 
-	if config.Auto && config.Keybinds.Quicksave == "" {
+	if config.Get().Auto && config.Get().Keybinds.Quicksave == "" {
 		handleError(errors.New("set keybinds.quicksave in config.yaml to use auto mode"))
 	}
 
-	if config.Auto {
+	if config.Get().Auto {
 		addCamsWatchers()
 
 		keyboard, err = sendkeys.NewKBWrapWithOptions()
@@ -115,18 +117,18 @@ func getDocumentsPath() (string, error) {
 
 // Detect if game profiles are exist
 func addCamsWatchers() {
-	if ets2Path := filepath.Join(documentsPath, ETS); isDir(ets2Path) {
+	if ets2Path := filepath.Join(documentsPath, ETS); utils.IsDir(ets2Path) {
 		watchPathList = append(watchPathList, filepath.Join(ets2Path, `cams.txt`))
 	}
 
-	if atsPath := filepath.Join(documentsPath, ATS); isDir(atsPath) {
+	if atsPath := filepath.Join(documentsPath, ATS); utils.IsDir(atsPath) {
 		watchPathList = append(watchPathList, filepath.Join(atsPath, `cams.txt`))
 	}
 }
 
 func addSaveWatchers() {
 	for _, profilePath := range profileList {
-		if isDir(filepath.Join(profilePath, `save`)) {
+		if utils.IsDir(filepath.Join(profilePath, `save`)) {
 			watchPathList = append(watchPathList, filepath.Join(profilePath, `save`))
 		}
 	}
@@ -169,7 +171,7 @@ func getProfileList() error {
 
 func getEts2Path() (string, error) {
 	ets2Path := filepath.Join(documentsPath, ETS)
-	if isDir(ets2Path) {
+	if utils.IsDir(ets2Path) {
 		return ets2Path, nil
 	}
 
@@ -178,7 +180,7 @@ func getEts2Path() (string, error) {
 
 func getAtsPath() (string, error) {
 	atsPath := filepath.Join(documentsPath, ATS)
-	if isDir(atsPath) {
+	if utils.IsDir(atsPath) {
 		return atsPath, nil
 	}
 
@@ -247,7 +249,7 @@ func addPathToWatch(watch *fsnotify.Watcher) error {
 			return err
 		}
 
-		log.Info("Monitoring " + formatPath(watchPath, documentsPath))
+		log.Info("Monitoring " + utils.FormatPath(watchPath, documentsPath))
 	}
 
 	return nil
@@ -268,10 +270,10 @@ func watchFiles(watch *fsnotify.Watcher) {
 						handleError(err)
 
 						if done {
-							log.Info("Updated " + formatPath(filepath.Join(ev.Name, `game.sii`), documentsPath) + " (" + fmt.Sprint(flushWatch.Milliseconds().Nanoseconds()) + "ms)")
+							log.Info("Updated " + utils.FormatPath(filepath.Join(ev.Name, `game.sii`), documentsPath) + " (" + fmt.Sprint(flushWatch.Milliseconds().Nanoseconds()) + "ms)")
 						}
 					} else if filepath.Base(ev.Name) == `cams.txt` {
-						err := keyboard.Type(config.Keybinds.Quicksave)
+						err := keyboard.Type(config.Get().Keybinds.Quicksave)
 						handleError(err)
 						log.Info("Detected cams.txt update, sending quicksave keybind")
 					}
@@ -286,7 +288,7 @@ func watchFiles(watch *fsnotify.Watcher) {
 }
 
 func flushChange(filePath string) (bool, error) {
-	if !isFile(filePath) {
+	if !utils.IsFile(filePath) {
 		return false, nil
 	}
 	needEdit, err := decryptSii(filePath)
@@ -297,7 +299,7 @@ func flushChange(filePath string) (bool, error) {
 		return false, nil
 	}
 
-	if !isFile(filePath) {
+	if !utils.IsFile(filePath) {
 		return false, nil
 	}
 	sii, err := readFile(filePath)
@@ -309,7 +311,7 @@ func flushChange(filePath string) (bool, error) {
 	if strings.Contains(filePath, ATS) {
 		camsPath = filepath.Join(documentsPath, ATS, `cams.txt`)
 	}
-	if !isFile(camsPath) {
+	if !utils.IsFile(camsPath) {
 		return false, nil
 	}
 	cams, err := readFile(camsPath)
@@ -324,7 +326,7 @@ func flushChange(filePath string) (bool, error) {
 			return false, err
 		}
 
-		if !isFile(filePath) {
+		if !utils.IsFile(filePath) {
 			return false, nil
 		}
 		err = writeFile(filePath, output)

@@ -1,7 +1,8 @@
-package main
+package config
 
 import (
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/creasty/defaults"
@@ -31,10 +32,10 @@ func getConfigPath() string {
 	if err != nil {
 		return ""
 	}
-	return path + "\\config.yaml"
+	return filepath.Join(path, "config.yaml")
 }
 
-func initConfig() error {
+func Init() error {
 	file, err := os.ReadFile(getConfigPath())
 	if err != nil {
 		if os.IsNotExist(err) {

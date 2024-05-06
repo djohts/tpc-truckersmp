@@ -1,4 +1,4 @@
-module main
+module github.com/djohts/tpc-truckersmp
 
 go 1.22
 

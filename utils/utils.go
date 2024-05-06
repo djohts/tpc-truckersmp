@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func isFile(path string) bool {
+func IsFile(path string) bool {
 	s, err := os.Stat(path)
 	if err != nil {
 		return false
@@ -17,7 +17,7 @@ func isFile(path string) bool {
 	return true
 }
 
-func isDir(path string) bool {
+func IsDir(path string) bool {
 	s, err := os.Stat(path)
 	if err != nil {
 		return false
@@ -28,6 +28,6 @@ func isDir(path string) bool {
 	return false
 }
 
-func formatPath(path string, parentPath string) string {
+func FormatPath(path string, parentPath string) string {
 	return fmt.Sprintf("...%s", strings.Replace(path, parentPath, "", 1))
 }
