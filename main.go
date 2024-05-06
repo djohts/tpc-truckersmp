@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"git.tcp.direct/kayos/sendkeys"
+	"github.com/bradhe/stopwatch"
+	"github.com/charmbracelet/log"
 	"github.com/fsnotify/fsnotify"
 	"golang.org/x/sys/windows/registry"
 )
@@ -23,9 +25,12 @@ const (
 )
 
 var (
+	documentsPath string
+
 	profileList   []string
 	watchPathList []string
-	keyboard      *sendkeys.KBWrap
+
+	keyboard *sendkeys.KBWrap
 )
 
 func main() {
@@ -33,31 +38,41 @@ func main() {
 		handleError(errors.New("SII_Decrypt.exe does not exist"))
 	}
 
-	fmt.Println("================= TPC For TruckersMP =================")
-	fmt.Println("Usage: 0. Type g_debug_camera 1 in console (only once)")
-	fmt.Println("       1. Alt+F12 to save coordinate of freecam")
-	fmt.Println("       2. Make a quicksave & reload 1-2 seconds later")
-	fmt.Println("======================================================")
+	log.Info("================= TPC For TruckersMP =================")
+	log.Info("Usage: 0. Type g_debug_camera 1 in console (only once)")
+	log.Info("       1. Alt+F12 to save coordinate of freecam")
+	log.Info("       2. Make a quicksave & reload 1-2 seconds later")
+	log.Info("======================================================")
 
 	err := initConfig()
 	handleError(err)
+
+	documents, err := getDocumentsPath()
+	handleError(err)
+	documentsPath = documents
+
+	if config.Debug {
+		log.SetReportCaller(true)
+		log.SetLevel(log.DebugLevel)
+	}
 
 	if config.Auto && config.Keybinds.Quicksave == "" {
 		handleError(errors.New("set keybinds.quicksave in config.yaml to use auto mode"))
 	}
 
 	if config.Auto {
-		err := addCamsWatchers()
-		handleError(err)
+		addCamsWatchers()
 
 		keyboard, err = sendkeys.NewKBWrapWithOptions()
 		handleError(err)
 	}
+
 	err = getProfileList()
 	handleError(err)
 	if len(profileList) == 0 {
 		handleError(errors.New("no local profiles found"))
 	}
+
 	addSaveWatchers()
 
 	watch, err := fsnotify.NewWatcher()
@@ -73,10 +88,14 @@ func main() {
 
 func handleError(err error) {
 	if err != nil {
-		fmt.Println("Fatal error, stop working!")
-		fmt.Println(err)
+		log.Helper()
+		log.Error("Fatal error, stop working!")
+		log.Error(err)
+
+		fmt.Printf("Press Enter to exit...")
 		bufio.NewReader(os.Stdin).ReadBytes('\n')
-		os.Exit(0)
+
+		os.Exit(1)
 	}
 }
 
@@ -86,25 +105,23 @@ func getDocumentsPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	defer key.Close()
 	path, _, _ := key.GetStringValue("Personal")
 	path = strings.TrimSpace(strings.Replace(path, "%USERPROFILE%", os.Getenv("USERPROFILE"), -1))
+
 	return path, nil
 }
 
 // Detect if game profiles are exist
-func addCamsWatchers() error {
-	documentsPath, err := getDocumentsPath()
-	if err != nil {
-		return err
-	}
+func addCamsWatchers() {
 	if ets2Path := filepath.Join(documentsPath, ETS); isDir(ets2Path) {
 		watchPathList = append(watchPathList, filepath.Join(ets2Path, `cams.txt`))
 	}
+
 	if atsPath := filepath.Join(documentsPath, ATS); isDir(atsPath) {
 		watchPathList = append(watchPathList, filepath.Join(atsPath, `cams.txt`))
 	}
-	return nil
 }
 
 func addSaveWatchers() {
@@ -113,6 +130,7 @@ func addSaveWatchers() {
 			watchPathList = append(watchPathList, filepath.Join(profilePath, `save`))
 		}
 	}
+
 	profileList = profileList[0:0]
 }
 
@@ -123,6 +141,7 @@ func listProfiles(path string, f fs.DirEntry, err error) error {
 	if f.IsDir() && filepath.Base(filepath.Dir(path)) == `profiles` {
 		profileList = append(profileList, path)
 	}
+
 	return nil
 }
 
@@ -149,26 +168,20 @@ func getProfileList() error {
 }
 
 func getEts2Path() (string, error) {
-	documentsPath, err := getDocumentsPath()
-	if err != nil {
-		return "", err
-	}
 	ets2Path := filepath.Join(documentsPath, ETS)
 	if isDir(ets2Path) {
 		return ets2Path, nil
 	}
+
 	return "", errors.New("ETS2 not found")
 }
 
 func getAtsPath() (string, error) {
-	documentsPath, err := getDocumentsPath()
-	if err != nil {
-		return "", err
-	}
 	atsPath := filepath.Join(documentsPath, ATS)
 	if isDir(atsPath) {
 		return atsPath, nil
 	}
+
 	return "", errors.New("ATS not found")
 }
 
@@ -181,10 +194,13 @@ func decryptSii(filePath string) (bool, error) {
 			if exitErr.Sys().(syscall.WaitStatus).ExitStatus() == 1 {
 				return false, nil
 			}
+
 			return false, errors.New(string(buf))
 		}
+
 		return false, errors.New(string(buf))
 	}
+
 	return true, nil
 }
 
@@ -193,13 +209,16 @@ func readFile(filePath string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanLines)
+
 	output := make([]string, 0)
 	for scanner.Scan() {
 		output = append(output, scanner.Text())
 	}
+
 	return output, nil
 }
 
@@ -208,13 +227,16 @@ func writeFile(filePath string, outPut string) error {
 	if err != nil {
 		return err
 	}
+
 	defer f.Close()
 	writer := bufio.NewWriter(f)
 	_, err = writer.WriteString(outPut)
 	if err != nil {
 		return err
 	}
+
 	writer.Flush()
+
 	return nil
 }
 
@@ -224,8 +246,10 @@ func addPathToWatch(watch *fsnotify.Watcher) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("Monitoring: " + watchPath)
+
+		log.Info("Monitoring " + formatPath(watchPath, documentsPath))
 	}
+
 	return nil
 }
 
@@ -236,16 +260,20 @@ func watchFiles(watch *fsnotify.Watcher) {
 			{
 				if ev.Op&fsnotify.Write == fsnotify.Write {
 					if filepath.Base(ev.Name) == `quicksave` {
-						time.Sleep(1 * time.Second)
+						time.Sleep(500 * time.Millisecond)
+
+						flushWatch := stopwatch.Start()
 						done, err := flushChange(filepath.Join(ev.Name, `game.sii`))
+						flushWatch.Stop()
 						handleError(err)
+
 						if done {
-							fmt.Println("Updated: " + filepath.Join(ev.Name, `game.sii`))
+							log.Info("Updated " + formatPath(filepath.Join(ev.Name, `game.sii`), documentsPath) + " (" + fmt.Sprint(flushWatch.Milliseconds().Nanoseconds()) + "ms)")
 						}
 					} else if filepath.Base(ev.Name) == `cams.txt` {
 						err := keyboard.Type(config.Keybinds.Quicksave)
 						handleError(err)
-						fmt.Println("Detected cams.txt update, sending quicksave keybind")
+						log.Info("Detected cams.txt update, sending quicksave keybind")
 					}
 				}
 			}
@@ -277,10 +305,6 @@ func flushChange(filePath string) (bool, error) {
 		return false, err
 	}
 
-	documentsPath, err := getDocumentsPath()
-	if err != nil {
-		return false, err
-	}
 	camsPath := filepath.Join(documentsPath, ETS, `cams.txt`)
 	if strings.Contains(filePath, ATS) {
 		camsPath = filepath.Join(documentsPath, ATS, `cams.txt`)
@@ -318,7 +342,8 @@ func parseCamsCoordinate(cams []string) (string, string) {
 	location := strings.Split(camCoordinate, ` , `)[1]
 	rotation := strings.Split(camCoordinate, ` , `)[2]
 	rotation = strings.Replace(rotation, `,`, `;`, 1)
-	fmt.Println("Target:" + `(` + location + `) (` + rotation + `)`)
+	log.Info("Target: " + `(` + location + `) (` + rotation + `)`)
+
 	return location, rotation
 }
 
@@ -368,5 +393,6 @@ func editSii(siiArray []string, location string, rotation string) (string, error
 			siiArray[i] = ""
 		}
 	}
+
 	return strings.Join(siiArray, "\n"), nil
 }

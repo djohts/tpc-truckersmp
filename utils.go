@@ -1,6 +1,10 @@
 package main
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"strings"
+)
 
 func isFile(path string) bool {
 	s, err := os.Stat(path)
@@ -22,4 +26,8 @@ func isDir(path string) bool {
 		return true
 	}
 	return false
+}
+
+func formatPath(path string, parentPath string) string {
+	return fmt.Sprintf("...%s", strings.Replace(path, parentPath, "", 1))
 }
