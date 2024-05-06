@@ -2,15 +2,19 @@ package main
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/charmbracelet/log"
 	"github.com/djohts/tpc-truckersmp/config"
 	"github.com/djohts/tpc-truckersmp/constants"
+	"github.com/djohts/tpc-truckersmp/updater"
 	"github.com/djohts/tpc-truckersmp/utils"
 	"github.com/djohts/tpc-truckersmp/watcher"
 )
 
 func main() {
+	fmt.Println("tpc-truckersmp", "v"+constants.APP_VERSION, "by djohts")
+
 	if !utils.IsFile("SII_Decrypt.exe") {
 		utils.HandleError(errors.New("SII_Decrypt.exe does not exist"))
 	}
@@ -21,7 +25,15 @@ func main() {
 	log.Info("       2. Make a quicksave & reload 1-2 seconds later")
 	log.Info("======================================================")
 
-	err := config.Init()
+	log.Info("Checking for updates...")
+	needsUpdate, latest, err := updater.CheckUpdates()
+	if err != nil {
+		log.Error("Failed to check for updates", "error", err)
+	} else if needsUpdate {
+		log.Info("New version available", "current", constants.APP_VERSION, "latest", latest[1:])
+	}
+
+	err = config.Init()
 	utils.HandleError(err)
 
 	DocumentsPath := &constants.DocumentsPath

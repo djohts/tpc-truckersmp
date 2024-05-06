@@ -6,8 +6,10 @@ require (
 	git.tcp.direct/kayos/sendkeys v0.0.0-20211216174833-565f782ccf21
 	github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea
 	github.com/charmbracelet/log v0.4.0
+	github.com/coreos/go-semver v0.3.1
 	github.com/creasty/defaults v1.7.0
 	github.com/fsnotify/fsnotify v1.7.0
+	github.com/google/go-github/v61 v61.0.0
 	golang.org/x/sys v0.20.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -16,6 +18,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/lipgloss v0.10.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
