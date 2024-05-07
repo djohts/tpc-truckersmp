@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/log"
 	"github.com/djohts/tpc-truckersmp/config"
 	"github.com/djohts/tpc-truckersmp/constants"
@@ -31,6 +34,26 @@ func main() {
 		log.Error("Failed to check for updates", "error", err)
 	} else if needsUpdate {
 		log.Info("New version available", "current", constants.APP_VERSION, "latest", latest[1:])
+
+		var update bool
+		form := huh.NewForm(huh.NewGroup(huh.NewConfirm().Title("Update?").Description("Do you want to update to the latest version?").Value(&update)))
+		err := form.Run()
+		utils.HandleError(err)
+
+		if update {
+			log.Info("Updating to the latest version...")
+			updated, err := updater.UpdateSelf()
+			if !updated {
+				log.Error("Failed to update", "error", err)
+			} else {
+				log.Info("Updated successfully.")
+				fmt.Printf("Press Enter to exit...")
+				bufio.NewReader(os.Stdin).ReadBytes('\n')
+				os.Exit(0)
+			}
+		}
+	} else {
+		log.Info("You are using the latest version")
 	}
 
 	err = config.Init()

@@ -61,3 +61,25 @@ func HandleError(err error) {
 		os.Exit(1)
 	}
 }
+
+func FindOne[T any](slice []T, filter func(*T) bool) (element *T) {
+	for i := 0; i < len(slice); i++ {
+		if filter(&slice[i]) {
+			return &slice[i]
+		}
+	}
+
+	return nil
+}
+
+func Filter[T any](slice []T, filter func(*T) bool) []*T {
+	var ret []*T = make([]*T, 0)
+
+	for i := 0; i < len(slice); i++ {
+		if filter(&slice[i]) {
+			ret = append(ret, &slice[i])
+		}
+	}
+
+	return ret
+}

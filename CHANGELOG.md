@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.0 (2024-05-07)
+
+> [!WARNING]
+> Starting with this release, the app will be shipped as two `.exe` files (`SII_Decrypt.exe` and `tpc.exe` respectively).
+> `SII_Decrypt.exe` is required for the app to work properly. Make sure it is in the same directory as `tpc.exe` and that it is not renamed.
+>
+> For now you have to download `SII_Decrypt.exe` manually, but the next version will automatically download it for you.
+
+- Automatic updater (I really hope it works)
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.2.0...v2.3.0
+
 ## 2.2.0 (2024-05-06)
 
 - Update checker
