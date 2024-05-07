@@ -16,6 +16,9 @@ ETS2 and ATS on Windows x64
 
 ## Download
 
+> [!NOTE]
+> Starting from version 2.4.0, the app will automatically download `SII_Decrypt.exe` for you.
+
 > [!WARNING]
 > You need to download both `SII_Decrypt.exe` and `tpc.exe` to use the app. Make sure they are in the same directory and that `SII_Decrypt.exe` is not renamed.
 

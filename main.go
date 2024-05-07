@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/djohts/tpc-truckersmp/config"
 	"github.com/djohts/tpc-truckersmp/constants"
+	"github.com/djohts/tpc-truckersmp/downloader"
 	"github.com/djohts/tpc-truckersmp/updater"
 	"github.com/djohts/tpc-truckersmp/utils"
 	"github.com/djohts/tpc-truckersmp/watcher"
@@ -19,7 +20,15 @@ func main() {
 	fmt.Println("tpc-truckersmp", "v"+constants.APP_VERSION, "by djohts")
 
 	if !utils.IsFile("SII_Decrypt.exe") {
-		utils.HandleError(errors.New("SII_Decrypt.exe does not exist"))
+		log.Warn("SII_Decrypt.exe not found, downloading...")
+		success, err := downloader.DownloadSiiDecrypt()
+		if err != nil {
+			utils.HandleError(err)
+		} else if success {
+			log.Info("SII_Decrypt.exe downloaded successfully")
+		} else {
+			utils.HandleError(errors.New("failed to download SII_Decrypt.exe"))
+		}
 	}
 
 	log.Info("================= TPC For TruckersMP =================")

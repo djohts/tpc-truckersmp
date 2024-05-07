@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.0 (2024-05-07)
+
+- Added automatic download of `SII_Decrypt.exe`
+- Added a progressbar for file downloads
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.3.0...v2.4.0
+
 ## 2.3.0 (2024-05-07)
 
 > [!WARNING]
