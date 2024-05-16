@@ -13,7 +13,7 @@ var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 
 const (
 	padding  = 2
-	maxWidth = 80
+	maxWidth = 75
 )
 
 type progressMsg float64
