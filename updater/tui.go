@@ -55,11 +55,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case progressMsg:
 		var cmds []tea.Cmd
 
+		cmds = append(cmds, m.progress.SetPercent(float64(msg)))
 		if msg >= 1.0 {
 			cmds = append(cmds, tea.Sequence(finalPause(), tea.Quit))
 		}
 
-		cmds = append(cmds, m.progress.SetPercent(float64(msg)))
 		return m, tea.Batch(cmds...)
 
 	// FrameMsg is sent when the progress bar wants to animate itself
