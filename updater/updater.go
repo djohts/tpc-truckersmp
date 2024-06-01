@@ -2,6 +2,7 @@ package updater
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,8 +51,40 @@ func UpdateSelf() (bool, error) {
 		return false, err
 	}
 
-	log.Info("Applying update...")
+	log.Info("Verifying checksum...")
+	checksumAsset := utils.FindOne(release.Assets, func(asset **github.ReleaseAsset) bool {
+		return *(*asset).Name == "tpc.exe.sha256"
+	})
+	if checksumAsset == nil {
+		return false, nil
+	}
+
+	checksumBytes := make([]byte, 64)
+	resp, err := http.Get(*(*checksumAsset).BrowserDownloadURL)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	_, err = resp.Body.Read(checksumBytes)
+	if err != nil {
+		return false, err
+	}
+
 	file, err := os.Open(filename)
+	if err != nil {
+		return false, err
+	}
+	h := sha256.New()
+	if _, err := io.Copy(h, file); err != nil {
+		return false, err
+	}
+	if fmt.Sprintf("%x", h.Sum(nil)) != string(checksumBytes) {
+		return false, fmt.Errorf("checksum mismatch. expected: %s, got: %x", checksumBytes, h.Sum(nil))
+	}
+	file.Close()
+
+	log.Info("Applying update...")
+	file, err = os.Open(filename)
 	if err != nil {
 		return false, err
 	}
