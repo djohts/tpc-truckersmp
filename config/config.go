@@ -20,11 +20,16 @@ type Keybinds struct {
 	Quicksave string `yaml:"quicksave" default:"-"`
 }
 
+type Features struct {
+	AttachTrailer bool `yaml:"attach_trailer" default:"true"`
+}
+
 type Configuration struct {
 	Debug bool `yaml:"debug" default:"false"`
 	Auto  bool `yaml:"auto" default:"false"`
 
 	Keybinds Keybinds `yaml:"keybinds"`
+	Features Features `yaml:"features"`
 }
 
 func getConfigPath() string {
