@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.1 (2024-06-01)
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.5.0...v2.5.1
+
 ## 2.5.0 (2024-06-01)
 
 - progress bar improvements by @djohts

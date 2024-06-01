@@ -12,9 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
-      - name: Fix path because windows
-        run: |
-          sed -i 's/\\\/SII_Decrypt.exe/\/SII_Decrypt.exe/' watcher/watcher.go
       - uses: wangyoucao577/go-release-action@8fa1e8368c8465264d64e0198208e10f71474c87 # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
