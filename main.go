@@ -16,6 +16,11 @@ import (
 )
 
 func main() {
+	if utils.IsFile(".tpc.exe.old") {
+		err := os.Remove(".tpc.exe.old")
+		utils.HandleError(err)
+	}
+
 	fmt.Println("tpc-truckersmp", "v"+constants.APP_VERSION, "by djohts")
 
 	log.Info("================= TPC For TruckersMP =================")
