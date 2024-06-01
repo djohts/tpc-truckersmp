@@ -22,7 +22,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-//go:embed ..\/SII_Decrypt.exe
+//go:embed SII_Decrypt.exe
 var decrypt_bytes []byte
 
 var (
