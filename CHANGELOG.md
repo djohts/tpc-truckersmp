@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.5.0 (2024-06-01)
+
+- progress bar improvements by @djohts
+- feat: embedded decrypt by @djohts in https://github.com/djohts/tpc-truckersmp/pull/10
+- feat: delete old exe file after update by @djohts in https://github.com/djohts/tpc-truckersmp/pull/11
+- chore(updater): verify checksum before applying update by @djohts in https://github.com/djohts/tpc-truckersmp/pull/12
+- chore: update dependencies by @djohts in https://github.com/djohts/tpc-truckersmp/pull/15
+- feat: toggle trailer attachment by @djohts in https://github.com/djohts/tpc-truckersmp/pull/16
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.4.0...v2.5.0
+
 ## 2.4.0 (2024-05-07)
 
 - Added automatic download of `SII_Decrypt.exe`
