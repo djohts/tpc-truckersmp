@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"bufio"
+	_ "embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -21,23 +22,39 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+//go:embed ..\/SII_Decrypt.exe
+var decrypt_bytes []byte
+
 var (
 	profileList   []string
 	watchPathList []string
 
 	keyboard *sendkeys.KBWrap
+
+	decrypt_path string
 )
 
 func Init() {
+	var err error
+	f, err := os.CreateTemp("", "SII_Decrypt.exe")
+	utils.HandleError(err)
+	decrypt_path = f.Name()
+	err = f.Chmod(0500)
+	utils.HandleError(err)
+	_, err = f.Write(decrypt_bytes)
+	utils.HandleError(err)
+	err = f.Close()
+	utils.HandleError(err)
+	defer os.Remove(f.Name())
+
 	if config.Get().Auto {
 		addCamsWatchers()
 
-		var err error
 		keyboard, err = sendkeys.NewKBWrapWithOptions()
 		utils.HandleError(err)
 	}
 
-	err := getProfileList()
+	err = getProfileList()
 	utils.HandleError(err)
 	if len(profileList) == 0 {
 		utils.HandleError(errors.New("no local profiles found"))
@@ -126,8 +143,7 @@ func getAtsPath() (string, error) {
 }
 
 func decryptSii(filePath string) (bool, error) {
-	pwd, _ := os.Getwd()
-	cmd := exec.Command(filepath.Join(pwd, "SII_Decrypt.exe"), filePath)
+	cmd := exec.Command(decrypt_path, filePath)
 	buf, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
@@ -138,7 +154,7 @@ func decryptSii(filePath string) (bool, error) {
 			return false, errors.New(string(buf))
 		}
 
-		return false, errors.New(string(buf))
+		return false, err
 	}
 
 	return true, nil
