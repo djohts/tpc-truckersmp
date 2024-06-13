@@ -11,7 +11,7 @@ jobs:
     name: release windows/amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: wangyoucao577/go-release-action@8fa1e8368c8465264d64e0198208e10f71474c87 # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
