@@ -275,10 +275,7 @@ func flushChange(filePath string) (bool, error) {
 
 	if len(cams) > 0 {
 		location, rotation := parseCamsCoordinate(cams)
-		output, err := editSii(sii, location, rotation)
-		if err != nil {
-			return false, err
-		}
+		output := editSii(sii, location, rotation)
 
 		if !utils.IsFile(filePath) {
 			return false, nil
@@ -303,23 +300,28 @@ func parseCamsCoordinate(cams []string) (string, string) {
 	return location, rotation
 }
 
-func editSii(siiArray []string, location string, rotation string) (string, error) {
+func editSii(siiArray []string, location string, rotation string) string {
 	attachTrailer := config.Get().Features.AttachTrailer
+	refuel := config.Get().Features.Refuel
+	teleport := config.Get().Features.Teleport
+	myTruckNameless := ""
 	attachTrailerState := 0
 
 	for i := range siiArray {
-		if strings.HasPrefix(siiArray[i], " assigned_trailer: _nameless") && attachTrailer {
+		if strings.HasPrefix(siiArray[i], " my_truck: _nameless") {
+			myTruckNameless = strings.Split(siiArray[i], `: `)[1]
+		} else if strings.HasPrefix(siiArray[i], " assigned_trailer: _nameless") && attachTrailer {
 			attachTrailerState = 1
 		} else if strings.HasPrefix(siiArray[i], " assigned_trailer_connected: false") && attachTrailerState == 1 {
 			attachTrailerState = 2
 			siiArray[i] = " assigned_trailer_connected: true"
 		} else if strings.HasPrefix(siiArray[i], " nav_node_position:") && attachTrailerState == 2 {
 			siiArray[i] = " nav_node_position: (0, 0, 0)"
-		} else if strings.HasPrefix(siiArray[i], " truck_placement:") {
+		} else if strings.HasPrefix(siiArray[i], " truck_placement:") && teleport {
 			siiArray[i] = " truck_placement: " + `(` + location + `) (` + rotation + `)`
-		} else if strings.HasPrefix(siiArray[i], " trailer_placement:") {
+		} else if strings.HasPrefix(siiArray[i], " trailer_placement:") && (attachTrailerState == 2 || teleport) {
 			siiArray[i] = ` trailer_placement: (0, 0, 0) (` + rotation + `)`
-		} else if strings.HasPrefix(siiArray[i], " slave_trailer_placements[") {
+		} else if strings.HasPrefix(siiArray[i], " slave_trailer_placements[") && (attachTrailerState == 2 || teleport) {
 			siiArray[i] = strings.Split(siiArray[i], `: `)[0] + `: (0, 0, 0) (` + rotation + `)`
 		} else if strings.HasPrefix(siiArray[i], " trailer_body_wear:") {
 			siiArray[i] = " trailer_body_wear: 0"
@@ -349,8 +351,10 @@ func editSii(siiArray []string, location string, rotation string) (string, error
 			siiArray[i] = ""
 		} else if strings.HasPrefix(siiArray[i], " wheels_wear_unfixable[") {
 			siiArray[i] = ""
+		} else if strings.HasPrefix(siiArray[i], " fuel_relative:") && strings.Contains(siiArray[i-7], myTruckNameless) && refuel {
+			siiArray[i] = " fuel_relative: " + fmt.Sprintf("%d", config.Get().Features.RefuelRelative)
 		}
 	}
 
-	return strings.Join(siiArray, "\n"), nil
+	return strings.Join(siiArray, "\n")
 }

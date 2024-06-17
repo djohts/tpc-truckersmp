@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.6.0 (2024-06-17)
+
+- Added toggleable refueling for current vehicle
+- Made trailer attachment toggleable
+- Made teleporting toggleable
+- Improved config handling
+- Updated dependencies
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.5.2...v2.6.0
+
 ## 2.5.2 (2024-06-01)
 
 **Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.5.1...v2.5.2

@@ -22,6 +22,11 @@ type Keybinds struct {
 
 type Features struct {
 	AttachTrailer bool `yaml:"attach_trailer" default:"true"`
+
+	Refuel         bool `yaml:"refuel" default:"false"`
+	RefuelRelative int  `yaml:"refuel_relative" default:"1"`
+
+	Teleport bool `yaml:"teleport" default:"true"`
 }
 
 type Configuration struct {
@@ -41,21 +46,16 @@ func getConfigPath() string {
 }
 
 func Init() error {
-	file, err := os.ReadFile(getConfigPath())
-	if err != nil {
-		if os.IsNotExist(err) {
-			config = &Configuration{}
-			defaults.Set(config)
-			WriteToDisk()
-			return nil
-		} else {
+	config = &Configuration{}
+	defaults.Set(config)
+	if file, err := os.ReadFile(getConfigPath()); err != nil {
+		if err := yaml.Unmarshal(file, &config); err != nil {
 			return err
 		}
-	}
-
-	if err := yaml.Unmarshal(file, &config); err != nil {
+	} else {
 		return err
 	}
+	WriteToDisk()
 
 	return nil
 }
