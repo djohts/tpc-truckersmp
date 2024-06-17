@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.1 (2024-06-17)
+
+forgot to update version constant
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.6.0...v2.6.1
+
 ## 2.6.0 (2024-06-17)
 
 - Added toggleable refueling for current vehicle
