@@ -49,11 +49,11 @@ func Init() error {
 	config = &Configuration{}
 	defaults.Set(config)
 	if file, err := os.ReadFile(getConfigPath()); err != nil {
+		return err
+	} else {
 		if err := yaml.Unmarshal(file, &config); err != nil {
 			return err
 		}
-	} else {
-		return err
 	}
 	WriteToDisk()
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.2 (2024-06-18)
+
+- Fixed config loading
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.6.1...v2.6.2
+
 ## 2.6.1 (2024-06-17)
 
 forgot to update version constant
