@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.3 (2024-06-24)
+
+- Fixed app crashing when no config file is present
+
+**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.6.2...v2.6.3
+
 ## 2.6.2 (2024-06-18)
 
 - Fixed config loading
