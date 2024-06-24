@@ -6,7 +6,7 @@ require (
 	git.tcp.direct/kayos/sendkeys v0.0.0-20211216174833-565f782ccf21
 	github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea
 	github.com/charmbracelet/bubbles v0.18.0
-	github.com/charmbracelet/bubbletea v0.26.4
+	github.com/charmbracelet/bubbletea v0.26.6
 	github.com/charmbracelet/huh v0.4.2
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/charmbracelet/log v0.4.0
