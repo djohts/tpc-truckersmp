@@ -16,12 +16,6 @@ ETS2 and ATS on Windows x64
 
 ## Download
 
-> [!NOTE]
-> Starting from version 2.4.0, the app will automatically download `SII_Decrypt.exe` for you.
-
-> [!WARNING]
-> You need to download both `SII_Decrypt.exe` and `tpc.exe` to use the app. Make sure they are in the same directory and that `SII_Decrypt.exe` is not renamed.
-
 Latest release: <https://github.com/djohts/tpc-truckersmp/releases/latest>
 
 ## How to Use
@@ -34,7 +28,7 @@ Latest release: <https://github.com/djohts/tpc-truckersmp/releases/latest>
 
 [LICENSE](LICENSE)
 
-Copyright (C) [sunwinbus](https://truckersmp.com/user/2385027)
+Copyright (C) [djoh](https://truckersmp.com/user/4358313)
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
