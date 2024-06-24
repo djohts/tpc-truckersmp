@@ -1,8 +1,6 @@
 # TPC & QuickFix for TruckersMP
 
-This fork is planned to be a long-term project with a lot of new features and improvements.
-
-Teleport to anywhere. Fix trucks at anywhere.
+Improved version of [sunwinbus/tpc-truckersmp](https://github.com/sunwinbus/tpc-truckersmp).
 
 ## Features
 
