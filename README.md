@@ -7,7 +7,8 @@ Teleport to anywhere. Fix trucks at anywhere.
 ## Features
 
 - Automatically repair your truck & trailer
-- Teleport anywhere on the map using the save coordinates feature (`Alt+F12`)
+- Teleport anywhere on the map
+- Refuel your current truck
 - A lot more features to come soon™️
 
 ## Compability
