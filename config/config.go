@@ -49,7 +49,10 @@ func Init() error {
 	config = &Configuration{}
 	defaults.Set(config)
 	if file, err := os.ReadFile(getConfigPath()); err != nil {
-		return err
+		if os.IsNotExist(err) {
+		} else {
+			return err
+		}
 	} else {
 		if err := yaml.Unmarshal(file, &config); err != nil {
 			return err
