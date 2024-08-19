@@ -3,7 +3,7 @@ package downloader
 import (
 	"github.com/djohts/tpc-truckersmp/updater"
 	"github.com/djohts/tpc-truckersmp/utils"
-	"github.com/google/go-github/v62/github"
+	"github.com/google/go-github/v63/github"
 )
 
 func DownloadSiiDecrypt() (bool, error) {
