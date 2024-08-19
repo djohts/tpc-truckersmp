@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/coreos/go-semver v0.3.1
-	github.com/creasty/defaults v1.7.0
+	github.com/creasty/defaults v1.8.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/google/go-github/v62 v62.0.0
 	github.com/minio/selfupdate v0.6.0
