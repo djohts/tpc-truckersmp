@@ -12,7 +12,7 @@ require (
 	github.com/charmbracelet/log v0.4.0
 	github.com/coreos/go-semver v0.3.1
 	github.com/creasty/defaults v1.8.0
-	github.com/fsnotify/fsnotify v1.7.0
+	github.com/fsnotify/fsnotify v1.8.0
 	github.com/google/go-github/v63 v63.0.0
 	github.com/minio/selfupdate v0.6.0
 	golang.org/x/sys v0.24.0
