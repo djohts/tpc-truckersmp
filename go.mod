@@ -1,6 +1,8 @@
 module github.com/djohts/tpc-truckersmp
 
-go 1.22
+go 1.22.0
+
+toolchain go1.24.1
 
 require (
 	git.tcp.direct/kayos/sendkeys v0.0.0-20211216174833-565f782ccf21
@@ -14,6 +16,7 @@ require (
 	github.com/creasty/defaults v1.8.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/google/go-github/v63 v63.0.0
+	github.com/google/go-github/v69 v69.2.0
 	github.com/minio/selfupdate v0.6.0
 	golang.org/x/sys v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
