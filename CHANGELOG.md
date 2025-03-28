@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1
+
+- Fix app version variable
+
 ## v2.7.0
 
 - Update SII Decrypt
