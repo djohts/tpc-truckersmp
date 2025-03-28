@@ -21,12 +21,14 @@ func main() {
 		utils.HandleError(err)
 	}
 
-	fmt.Println("tpc-truckersmp", "v"+constants.APP_VERSION, "by djohts")
+	fmt.Println("tpc-truckersmp", "version", constants.APP_VERSION, "by djohts")
 
 	log.Info("================= TPC For TruckersMP =================")
 	log.Info("Usage: 0. Type g_debug_camera 1 in console (only once)")
-	log.Info("       1. Alt+F12 to save coordinate of freecam")
-	log.Info("       2. Make a quicksave & reload 1-2 seconds later")
+	log.Info("       1. Alt + F12 to save coordinate of freecam     ")
+	log.Info("       2. Make a quicksave & reload it ~1 second later")
+	log.Info("            Note! Making a quicksave is not required  ")
+	log.Info("                    when using auto mode              ")
 	log.Info("======================================================")
 
 	log.Info("Checking for updates...")

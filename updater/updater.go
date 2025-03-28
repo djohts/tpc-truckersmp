@@ -26,6 +26,10 @@ func CheckUpdates() (bool, string, error) {
 		return false, "", err
 	}
 
+	if constants.APP_VERSION == "dev" {
+		return false, "", nil
+	}
+
 	needsUpdate := semver.New(constants.APP_VERSION).LessThan(*semver.New((*release.TagName)[1:]))
 
 	return needsUpdate, *release.TagName, nil
@@ -53,7 +57,7 @@ func UpdateSelf() (bool, error) {
 
 	log.Info("Verifying checksum...")
 	checksumAsset := utils.FindOne(release.Assets, func(asset **github.ReleaseAsset) bool {
-		return *(*asset).Name == "tpc.exe.sha256"
+		return *(*asset).Name == "checksums.txt"
 	})
 	if checksumAsset == nil {
 		return false, nil
