@@ -1,24 +1,18 @@
 # Changelog
 
-## 2.6.3 (2024-06-24)
+## v2.6.3
 
 - Fixed app crashing when no config file is present
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.6.2...v2.6.3
-
-## 2.6.2 (2024-06-18)
+## v2.6.2
 
 - Fixed config loading
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.6.1...v2.6.2
-
-## 2.6.1 (2024-06-17)
+## v2.6.1
 
 forgot to update version constant
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.6.0...v2.6.1
-
-## 2.6.0 (2024-06-17)
+## v2.6.0
 
 - Added toggleable refueling for current vehicle
 - Made trailer attachment toggleable
@@ -26,17 +20,15 @@ forgot to update version constant
 - Improved config handling
 - Updated dependencies
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.5.2...v2.6.0
+## v2.5.2
 
-## 2.5.2 (2024-06-01)
+_no changes_
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.5.1...v2.5.2
+## v2.5.1
 
-## 2.5.1 (2024-06-01)
+_no changes_
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.5.0...v2.5.1
-
-## 2.5.0 (2024-06-01)
+## v2.5.0
 
 - progress bar improvements by @djohts
 - feat: embedded decrypt by @djohts in https://github.com/djohts/tpc-truckersmp/pull/10
@@ -45,16 +37,12 @@ forgot to update version constant
 - chore: update dependencies by @djohts in https://github.com/djohts/tpc-truckersmp/pull/15
 - feat: toggle trailer attachment by @djohts in https://github.com/djohts/tpc-truckersmp/pull/16
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.4.0...v2.5.0
-
-## 2.4.0 (2024-05-07)
+## v2.4.0
 
 - Added automatic download of `SII_Decrypt.exe`
 - Added a progressbar for file downloads
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.3.0...v2.4.0
-
-## 2.3.0 (2024-05-07)
+## v2.3.0
 
 > [!WARNING]
 > Starting with this release, the app will be shipped as two `.exe` files (`SII_Decrypt.exe` and `tpc.exe` respectively).
@@ -64,30 +52,22 @@ forgot to update version constant
 
 - Automatic updater (I really hope it works)
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.2.0...v2.3.0
-
-## 2.2.0 (2024-05-06)
+## v2.2.0
 
 - Update checker
 - More structural changes
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.1.0...v2.2.0
-
-## 2.1.0 (2024-05-06)
+## v2.1.0
 
 - Improved logging
 - Code cleanup and optimizations
 - Updated dependencies
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.0.1...v2.1.0
-
-## 2.0.1 (2024-05-01)
+## v2.0.1
 
 - Updated dependencies
 
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v2.0.0...v2.0.1
-
-## 2.0.0 (2024-04-30)
+## v2.0.0
 
 - Permanent wear will now be removed as well
 - Optimized executable size
@@ -96,8 +76,6 @@ forgot to update version constant
   - Requires `keybinds.quicksave` to be set in the config file
   - Automatically sends the quicksave bind via [kayos/sendkeys](https://git.tcp.direct/kayos/sendkeys) after pressing `Alt+F12`
 - Updated dependencies
-
-**Full Changelog**: https://github.com/djohts/tpc-truckersmp/compare/v0.2023.0122...v2.0.0
 
 ## unknown (from upstream repo)
 
