@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.0
+
+- Update SII Decrypt
+- Update dependencies
+- Now built using Go 1.24
+- A few other minor changes
+
 ## v2.6.3
 
 - Fixed app crashing when no config file is present
