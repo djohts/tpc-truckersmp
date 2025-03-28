@@ -14,7 +14,7 @@ import (
 	"github.com/coreos/go-semver/semver"
 	"github.com/djohts/tpc-truckersmp/constants"
 	"github.com/djohts/tpc-truckersmp/utils"
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v70/github"
 	"github.com/minio/selfupdate"
 )
 
