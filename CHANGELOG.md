@@ -1,6 +1,10 @@
 # Changelog
 
-## 2.7.1
+## v2.7.2
+
+- Temporarily disable checksum verification upon updating
+
+## v2.7.1
 
 - Fix app version variable
 
