@@ -1,25 +1,68 @@
-on:
-  release:
-    types: [created]
+# totally not stolen from https://github.com/pterodactyl/wings/blob/develop/.github/workflows/release.yaml
 
-permissions:
-  contents: write
-  packages: write
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
 
 jobs:
-  release-windows-amd64:
-    name: release windows/amd64
-    runs-on: ubuntu-latest
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # write is required to create releases and push.
+
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: wangyoucao577/go-release-action@6ac7dba1f9e61850053324549cb6bc88e4b473d2 # v1
+      - name: Code checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Go
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: windows
-          goarch: amd64
-          goversion: 1.22.3
-          ldflags: -s
-          asset_name: tpc
-          compress_assets: OFF
-          md5sum: true
-          sha256sum: true
+          go-version: "1.24.1"
+
+      - name: Build release binaries
+        env:
+          CGO_ENABLED: 0
+          REF: ${{ github.ref }}
+        run: GOOS=windows GOARCH=amd64 go build -o out/tpc.exe -v -ldflags="-s -w -X github.com/djohts/tpc-truckersmp/constants.APP_VERSION=${REF:11}" github.com/djohts/tpc-truckersmp
+
+      - name: Extract changelog
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          sed -n "/^## ${REF:10}/,/^## /{/^## /b;p}" CHANGELOG.md > ./RELEASE_CHANGELOG
+
+      - name: Create checksum and add to changelog
+        run: |
+          SUM=`cd out && sha256sum tpc.exe`
+          echo -e "\n#### SHA256 Checksum\n\`\`\`\n$SUM\n\`\`\`\n" >> ./RELEASE_CHANGELOG
+          echo -e "$SUM" > checksums.txt
+
+      - name: Create release branch
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          BRANCH=release/${REF:10}
+          git config --local user.email "admin@proxied.host"
+          git config --local user.name "automated djoh"
+          git checkout -b $BRANCH
+          git push -u origin $BRANCH
+          sed -i "s/APP_VERSION = \".*\"/APP_VERSION = \"${REF:11}\"/" constants/constants.go
+          git add constants/constants.go
+          git commit -m "bump version for release"
+          git push
+
+      - name: Create release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: true
+          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+          body_path: ./RELEASE_CHANGELOG
+          files: |
+            out/*
+            checksums.txt
