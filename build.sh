@@ -1,0 +1,1 @@
+go build -o out/tpc.exe -v -ldflags="-s -w" github.com/djohts/tpc-truckersmp
