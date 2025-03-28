@@ -1,0 +1,1 @@
+- Fix app version variable
