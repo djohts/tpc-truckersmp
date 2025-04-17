@@ -20,13 +20,13 @@ import (
 var p *tea.Program
 
 func CheckUpdates() (bool, string, error) {
+	if constants.APP_VERSION == "dev" {
+		return false, "", nil
+	}
+
 	release, err := GetLatestRelease()
 	if err != nil {
 		return false, "", err
-	}
-
-	if constants.APP_VERSION == "dev" {
-		return false, "", nil
 	}
 
 	needsUpdate := semver.New(constants.APP_VERSION).LessThan(*semver.New((*release.TagName)[1:]))
