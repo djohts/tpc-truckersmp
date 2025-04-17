@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.7.3
+
+- Added GitHub link to application startup header
+- Updated dependencies
+- Internal improvements
+
 ## v2.7.2
 
 - Temporarily disable checksum verification upon updating
