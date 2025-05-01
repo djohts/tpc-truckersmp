@@ -74,11 +74,13 @@ func Init() {
 }
 
 func addCamsWatchers() {
-	if ets2Path := filepath.Join(constants.DocumentsPath, constants.ETS); utils.IsDir(ets2Path) {
+	if ets2Path := filepath.Join(constants.DocumentsPath, constants.ETS); utils.IsDir(ets2Path) &&
+		utils.IsFile(filepath.Join(ets2Path, `cams.txt`)) {
 		watchPathList = append(watchPathList, filepath.Join(ets2Path, `cams.txt`))
 	}
 
-	if atsPath := filepath.Join(constants.DocumentsPath, constants.ATS); utils.IsDir(atsPath) {
+	if atsPath := filepath.Join(constants.DocumentsPath, constants.ATS); utils.IsDir(atsPath) &&
+		utils.IsFile(filepath.Join(atsPath, `cams.txt`)) {
 		watchPathList = append(watchPathList, filepath.Join(atsPath, `cams.txt`))
 	}
 }
