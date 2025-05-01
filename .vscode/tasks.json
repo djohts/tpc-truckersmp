@@ -4,8 +4,7 @@
     {
       "label": "Build package",
       "type": "shell",
-      "command": "go build -ldflags \"-s\" -o out/tpc.exe",
-      "options": {},
+      "command": "go build -o out/tpc.exe -v -ldflags=\"-s -w\" github.com/djohts/tpc-truckersmp",
       "problemMatcher": ["$go"],
       "group": {
         "kind": "build",
