@@ -22,39 +22,25 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-//go:embed SII_Decrypt.exe
-var decrypt_bytes []byte
-
 var (
 	profileList   []string
 	watchPathList []string
 
 	keyboard *sendkeys.KBWrap
-
-	decrypt_path string
 )
 
 func Init() {
-	var err error
-	f, err := os.CreateTemp("", "SII_Decrypt.exe")
-	utils.HandleError(err)
-	decrypt_path = f.Name()
-	err = f.Chmod(0500)
-	utils.HandleError(err)
-	_, err = f.Write(decrypt_bytes)
-	utils.HandleError(err)
-	err = f.Close()
-	utils.HandleError(err)
-	defer os.Remove(f.Name())
+	utils.EnsureDecrypt()
 
 	if config.Get().Auto {
 		addCamsWatchers()
 
+		var err error
 		keyboard, err = sendkeys.NewKBWrapWithOptions()
 		utils.HandleError(err)
 	}
 
-	err = getProfileList()
+	err := getProfileList()
 	utils.HandleError(err)
 	if len(profileList) == 0 {
 		utils.HandleError(errors.New("no local profiles found"))
@@ -145,7 +131,8 @@ func getAtsPath() (string, error) {
 }
 
 func decryptSii(filePath string) (bool, error) {
-	cmd := exec.Command(decrypt_path, filePath)
+	decryptFile := utils.EnsureDecrypt()
+	cmd := exec.Command(decryptFile.Name(), filePath)
 	buf, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
@@ -163,7 +150,7 @@ func decryptSii(filePath string) (bool, error) {
 }
 
 func readFile(filePath string) ([]string, error) {
-	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	f, err := os.OpenFile(filePath, os.O_RDONLY, 0o644)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +168,7 @@ func readFile(filePath string) ([]string, error) {
 }
 
 func writeFile(filePath string, outPut string) error {
-	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		return err
 	}

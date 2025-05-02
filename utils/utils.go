@@ -2,6 +2,8 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -9,6 +11,9 @@ import (
 	"github.com/charmbracelet/log"
 	"golang.org/x/sys/windows/registry"
 )
+
+//go:embed SII_Decrypt.exe
+var decrypt_bytes []byte
 
 func FormatPath(path string, parentPath string) string {
 	return fmt.Sprintf("...%s", strings.Replace(path, parentPath, "", 1))
@@ -63,7 +68,7 @@ func HandleError(err error) {
 }
 
 func FindOne[T any](slice []T, filter func(*T) bool) (element *T) {
-	for i := 0; i < len(slice); i++ {
+	for i := range slice {
 		if filter(&slice[i]) {
 			return &slice[i]
 		}
@@ -75,11 +80,49 @@ func FindOne[T any](slice []T, filter func(*T) bool) (element *T) {
 func Filter[T any](slice []T, filter func(*T) bool) []*T {
 	var ret []*T = make([]*T, 0)
 
-	for i := 0; i < len(slice); i++ {
+	for i := range slice {
 		if filter(&slice[i]) {
 			ret = append(ret, &slice[i])
 		}
 	}
 
 	return ret
+}
+
+func EnsureDecrypt() *os.File {
+	if IsFile("SII_Decrypt.exe") {
+		data, err := os.ReadFile("SII_Decrypt.exe")
+		HandleError(err)
+
+		if !bytes.Equal(data, decrypt_bytes) {
+			err = os.Remove("SII_Decrypt.exe")
+			HandleError(err)
+
+			return installDecrypt()
+		}
+
+		f, err := os.OpenFile("SII_Decrypt.exe", os.O_RDWR, 0o755)
+		HandleError(err)
+
+		defer f.Close()
+
+		return f
+	}
+
+	return installDecrypt()
+}
+
+func installDecrypt() *os.File {
+	f, err := os.Create("SII_Decrypt.exe")
+	HandleError(err)
+
+	defer f.Close()
+
+	_, err = f.Write(decrypt_bytes)
+	HandleError(err)
+
+	err = f.Chmod(0o755)
+	HandleError(err)
+
+	return f
 }
