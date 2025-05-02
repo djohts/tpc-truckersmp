@@ -2,6 +2,8 @@ package updater
 
 import (
 	"context"
+	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,7 +26,7 @@ func CheckUpdates() (bool, string, error) {
 		return false, "", nil
 	}
 
-	release, err := GetLatestRelease()
+	release, err := getLatestRelease()
 	if err != nil {
 		return false, "", err
 	}
@@ -35,7 +37,7 @@ func CheckUpdates() (bool, string, error) {
 }
 
 func UpdateSelf() (bool, error) {
-	release, err := GetLatestRelease()
+	release, err := getLatestRelease()
 	if err != nil {
 		return false, err
 	}
@@ -44,58 +46,53 @@ func UpdateSelf() (bool, error) {
 		return *(*asset).Name == "tpc.exe"
 	})
 	if asset == nil {
-		return false, nil
+		return false, errors.New("executable file not found in release")
 	}
 
 	log.Info("Downloading latest version...")
 	filename := "tpc.exe.tmp"
 	err = DownloadFile(*(*asset).BrowserDownloadURL, filename)
 	if err != nil {
-		return false, err
+		return false, errors.New("failed to download latest version: " + err.Error())
 	}
 
-	// log.Info("Verifying checksum...")
-	// checksumAsset := utils.FindOne(release.Assets, func(asset **github.ReleaseAsset) bool {
-	// 	return *(*asset).Name == "checksums.txt"
-	// })
-	// if checksumAsset == nil {
-	// 	return false, nil
-	// }
+	log.Info("Verifying checksum...")
+	checksumAsset := utils.FindOne(release.Assets, func(asset **github.ReleaseAsset) bool {
+		return *(*asset).Name == "checksums.txt"
+	})
+	if checksumAsset == nil {
+		return false, errors.New("checksum file not found in release")
+	}
 
-	// checksumBytes := make([]byte, 64)
-	// resp, err := http.Get(*(*checksumAsset).BrowserDownloadURL)
-	// if err != nil {
-	// 	return false, err
-	// }
-	// defer resp.Body.Close()
-	// _, err = resp.Body.Read(checksumBytes)
-	// if err != nil {
-	// 	return false, err
-	// }
+	checksumBytes := make([]byte, 64)
+	resp, err := http.Get(*(*checksumAsset).BrowserDownloadURL)
+	if err != nil {
+		return false, errors.New("failed to download checksum file: " + err.Error())
+	}
+	defer resp.Body.Close()
+	_, err = resp.Body.Read(checksumBytes)
+	if err != nil {
+		return false, errors.New("failed to read checksum data: " + err.Error())
+	}
 
-	// file, err := os.Open(filename)
-	// if err != nil {
-	// 	return false, err
-	// }
-	// h := sha256.New()
-	// if _, err := io.Copy(h, file); err != nil {
-	// 	return false, err
-	// }
-	// if fmt.Sprintf("%x", h.Sum(nil)) != string(checksumBytes) {
-	// 	return false, fmt.Errorf("checksum mismatch. expected: %s, got: %x", checksumBytes, h.Sum(nil))
-	// }
-	// file.Close()
-
-	log.Info("Applying update...")
 	file, err := os.Open(filename)
 	if err != nil {
-		return false, err
+		return false, errors.New("failed to open downloaded file: " + err.Error())
 	}
+	h := sha256.New()
+	if _, err := io.Copy(h, file); err != nil {
+		return false, errors.New("failed to read file for checksum: " + err.Error())
+	}
+	if fmt.Sprintf("%x", h.Sum(nil)) != string(checksumBytes) {
+		return false, fmt.Errorf("checksum mismatch. expected: %s, got: %x", checksumBytes, h.Sum(nil))
+	}
+
+	log.Info("Applying update...")
 	err = selfupdate.Apply(file, selfupdate.Options{})
 	file.Close()
 	os.Remove(filename)
 	if err != nil {
-		return false, err
+		return false, errors.New("failed to apply update: " + err.Error())
 	}
 
 	return true, nil
@@ -104,14 +101,13 @@ func UpdateSelf() (bool, error) {
 func DownloadFile(url, filename string) error {
 	res, err := http.Get(url)
 	if err != nil {
-		return err
+		return errors.New("failed to download file: " + err.Error())
 	}
 	defer res.Body.Close()
 
 	file, err := os.Create(filename)
 	if err != nil {
-		fmt.Println("could not create file:", err)
-		os.Exit(1)
+		return errors.New("failed to create file: " + err.Error())
 	}
 	defer file.Close()
 
@@ -135,8 +131,7 @@ func DownloadFile(url, filename string) error {
 	go pw.Start()
 
 	if _, err := p.Run(); err != nil {
-		fmt.Println("error running program:", err)
-		os.Exit(1)
+		return errors.New("failed to run program: " + err.Error())
 	}
 
 	return nil
