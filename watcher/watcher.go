@@ -2,7 +2,6 @@ package watcher
 
 import (
 	"bufio"
-	_ "embed"
 	"errors"
 	"fmt"
 	"io/fs"
