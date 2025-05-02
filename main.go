@@ -24,7 +24,7 @@ func main() {
 	fmt.Println("tpc-truckersmp", "version", constants.APP_VERSION, "by djohts")
 
 	log.Info("================= TPC For TruckersMP =================")
-	log.Info("Github: https://github.com/djohts/tpc-truckersmp      ")
+	log.Info("GitHub: https://github.com/djohts/tpc-truckersmp      ")
 	log.Info("Usage: 0. Type g_debug_camera 1 in console (only once)")
 	log.Info("       1. Alt + F12 to save coordinate of freecam     ")
 	log.Info("       2. Make a quicksave & reload it ~1 second later")
@@ -48,7 +48,7 @@ func main() {
 			log.Info("Updating to the latest version...")
 			updated, err := updater.UpdateSelf()
 			if !updated {
-				log.Error("Failed to update", "error", err)
+				log.Error("Failed to update. Please download latest release from GitHub manually and DM me on Discord if you wish this to be fixed.", "error", err)
 			} else {
 				log.Info("Updated successfully.")
 				fmt.Printf("Press Enter to exit...")
