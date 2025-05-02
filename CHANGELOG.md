@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.8.1
+
+- Fixed a crash due to an incorrect execution call for `SII_Decrypt.exe`
+
 ## v2.8.0
 
 - Fixed an app crash when using auto mode without a `cams.txt` file in either of the Document folders
