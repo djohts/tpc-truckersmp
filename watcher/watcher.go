@@ -132,7 +132,10 @@ func getAtsPath() (string, error) {
 
 func decryptSii(filePath string) (bool, error) {
 	decryptFile := utils.EnsureDecrypt()
-	cmd := exec.Command(decryptFile.Name(), filePath)
+	execPath, err := filepath.Abs(decryptFile.Name())
+	utils.HandleError(err)
+
+	cmd := exec.Command(execPath, filePath)
 	buf, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
