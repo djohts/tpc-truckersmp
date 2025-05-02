@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.8.0
+
+- Fixed an app crash when using auto mode without a `cams.txt` file in either of the Document folders
+- Changed internal handling of `SII_Decrypt.exe`. It will now be persistent in the same directory as the application and will not spam the temporary folder anymore.
+- Updater improvements. Please report any issues by DMing me on Discord or by creating an issue.
+- A few message updates.
+
 ## v2.7.3
 
 - Added GitHub link to application startup header
