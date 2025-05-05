@@ -15,7 +15,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/google/go-github/v71 v71.0.0
 	github.com/minio/selfupdate v0.6.0
-	golang.org/x/sys v0.32.0
+	golang.org/x/sys v0.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
