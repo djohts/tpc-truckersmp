@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/huh v0.7.0
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/charmbracelet/log v0.4.1
+	github.com/charmbracelet/log v0.4.2
 	github.com/coreos/go-semver v0.3.1
 	github.com/creasty/defaults v1.8.0
 	github.com/fsnotify/fsnotify v1.9.0
