@@ -5,6 +5,6 @@ const (
 	ATS = "American Truck Simulator"
 )
 
-var APP_VERSION = "dev"
+var APP_VERSION = "2.9.0"
 
 var DocumentsPath string
