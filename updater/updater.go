@@ -16,7 +16,6 @@ import (
 	"github.com/djohts/tpc-truckersmp/constants"
 	"github.com/djohts/tpc-truckersmp/utils"
 	"github.com/google/go-github/v72/github"
-	"github.com/minio/selfupdate"
 )
 
 var p *tea.Program
@@ -50,7 +49,7 @@ func UpdateSelf() (bool, error) {
 	}
 
 	log.Info("Downloading latest version...")
-	filename := "tpc.exe.tmp"
+	filename := "tpc-" + *release.TargetCommitish + ".exe"
 	err = DownloadFile(*(*asset).BrowserDownloadURL, filename)
 	if err != nil {
 		return false, errors.New("failed to download latest version: " + err.Error())
@@ -83,19 +82,33 @@ func UpdateSelf() (bool, error) {
 	if _, err := io.Copy(h, file); err != nil {
 		return false, errors.New("failed to read file for checksum: " + err.Error())
 	}
+	file.Close()
 	if fmt.Sprintf("%x", h.Sum(nil)) != string(checksumBytes) {
 		return false, fmt.Errorf("checksum mismatch. expected: %s, got: %x", checksumBytes, h.Sum(nil))
 	}
 
 	log.Info("Applying update...")
-	err = selfupdate.Apply(file, selfupdate.Options{})
-	file.Close()
-	os.Remove(filename)
-	if err != nil {
+	if err := ApplyUpdate(file); err != nil {
 		return false, errors.New("failed to apply update: " + err.Error())
 	}
 
 	return true, nil
+}
+
+func ApplyUpdate(file *os.File) error {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return errors.New("failed to get executable path: " + err.Error())
+	}
+
+	if err := os.Rename(executablePath, "tpc.exe.old"); err != nil {
+		return errors.New("failed to rename old executable: " + err.Error())
+	}
+	if err := os.Rename(file.Name(), executablePath); err != nil {
+		return errors.New("failed to rename new executable: " + err.Error())
+	}
+
+	return nil
 }
 
 func DownloadFile(url, filename string) error {
