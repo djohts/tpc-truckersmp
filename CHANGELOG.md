@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.9.0
+
+- Improved the updater, should be more reliable now
+
 ## v2.8.1
 
 - Fixed a crash due to an incorrect execution call for `SII_Decrypt.exe`
