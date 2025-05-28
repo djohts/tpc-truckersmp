@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.9.2
+
+- Updater will now keep previous app versions to allow rollback in case of issues
+
 ## v2.9.1
 
 - Fixed a random crash
