@@ -49,7 +49,7 @@ func UpdateSelf() (bool, error) {
 	}
 
 	log.Info("Downloading latest version...")
-	filename := "tpc-" + *release.TargetCommitish + ".exe"
+	filename := "tpc-" + *release.TagName + ".exe"
 	err = DownloadFile(*(*asset).BrowserDownloadURL, filename)
 	if err != nil {
 		return false, errors.New("failed to download latest version: " + err.Error())
