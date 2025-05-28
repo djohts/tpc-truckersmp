@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -134,7 +135,8 @@ func decryptSii(filePath string) (bool, error) {
 	execPath, err := filepath.Abs(decryptFile.Name())
 	utils.HandleError(err)
 
-	cmd := exec.Command(execPath, filePath)
+	cmd := exec.Command(execPath, "-i", filePath)
+	log.Debug("Decrypting " + utils.FormatPath(filePath, constants.DocumentsPath))
 	buf, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
@@ -201,29 +203,52 @@ func addPathToWatch(watch *fsnotify.Watcher) error {
 }
 
 func watchFiles(watch *fsnotify.Watcher) {
+	var isOnCooldown bool
+	var mu sync.Mutex
+
 	for {
 		select {
 		case ev := <-watch.Events:
 			{
-				if ev.Op&fsnotify.Write == fsnotify.Write {
-					if filepath.Base(ev.Name) == `quicksave` {
-						time.Sleep(500 * time.Millisecond)
+				if ev.Op&fsnotify.Write != fsnotify.Write {
+					continue
+				}
 
-						flushWatch := stopwatch.Start()
-						done, err := flushChange(filepath.Join(ev.Name, `game.sii`))
-						flushWatch.Stop()
-						utils.HandleError(err)
+				base := filepath.Base(ev.Name)
 
-						if done {
-							log.Info("Updated " + utils.FormatPath(filepath.Join(ev.Name, `game.sii`), constants.DocumentsPath) + " (" + fmt.Sprint(flushWatch.Milliseconds().Nanoseconds()) + "ms)")
-						}
-					} else if filepath.Base(ev.Name) == `cams.txt` {
-						err := keyboard.Type(config.Get().Keybinds.Quicksave)
-						utils.HandleError(err)
-						log.Info("Detected cams.txt update, sending quicksave keybind")
+				if base == `quicksave` {
+					mu.Lock()
+					if isOnCooldown {
+						mu.Unlock()
+						continue
 					}
+					isOnCooldown = true
+					mu.Unlock()
+
+					go func() {
+						time.Sleep(750 * time.Millisecond)
+						mu.Lock()
+						isOnCooldown = false
+						mu.Unlock()
+					}()
+
+					time.Sleep(250 * time.Millisecond)
+
+					flushWatch := stopwatch.Start()
+					done, err := flushChange(filepath.Join(ev.Name, `game.sii`))
+					flushWatch.Stop()
+					utils.HandleError(err)
+
+					if done {
+						log.Info("Updated " + utils.FormatPath(filepath.Join(ev.Name, `game.sii`), constants.DocumentsPath) + " (" + fmt.Sprint(flushWatch.Milliseconds().Nanoseconds()) + "ms)")
+					}
+				} else if base == `cams.txt` {
+					err := keyboard.Type(config.Get().Keybinds.Quicksave)
+					utils.HandleError(err)
+					log.Info("Detected cams.txt update, sending quicksave keybind")
 				}
 			}
+
 		case err := <-watch.Errors:
 			{
 				utils.HandleError(err)
@@ -241,6 +266,7 @@ func flushChange(filePath string) (bool, error) {
 		return false, err
 	}
 	if !needEdit {
+		log.Debug("No need to edit " + utils.FormatPath(filePath, constants.DocumentsPath))
 		return false, nil
 	}
 
