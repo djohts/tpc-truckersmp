@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.9.1
+
+- Fixed a random crash
+- Fixed the app triggering itself from decrypt writes
+
 ## v2.9.0
 
 - Improved the updater, should be more reliable now
