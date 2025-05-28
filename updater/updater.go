@@ -101,7 +101,7 @@ func ApplyUpdate(file *os.File) error {
 		return errors.New("failed to get executable path: " + err.Error())
 	}
 
-	if err := os.Rename(executablePath, "tpc.exe.old"); err != nil {
+	if err := os.Rename(executablePath, "tpc-"+constants.APP_VERSION+"-old.exe"); err != nil {
 		return errors.New("failed to rename old executable: " + err.Error())
 	}
 	if err := os.Rename(file.Name(), executablePath); err != nil {
