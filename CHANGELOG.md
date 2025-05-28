@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.9.3
+
+- Change temp file name to include tag name instead of branch name
+
 ## v2.9.2
 
 - Updater will now keep previous app versions to allow rollback in case of issues
