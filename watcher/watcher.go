@@ -135,7 +135,7 @@ func decryptSii(filePath string) (bool, error) {
 	execPath, err := filepath.Abs(decryptFile.Name())
 	utils.HandleError(err)
 
-	cmd := exec.Command(execPath, "-i", filePath)
+	cmd := exec.Command(execPath, filePath)
 	log.Debug("Decrypting " + utils.FormatPath(filePath, constants.DocumentsPath))
 	buf, err := cmd.Output()
 	if err != nil {
