@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.9.4
+
+- Fix for save decrypting not working in some cases
+
 ## v2.9.3
 
 - Change temp file name to include tag name instead of branch name
