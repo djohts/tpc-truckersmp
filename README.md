@@ -25,8 +25,8 @@ Latest release: <https://github.com/djohts/tpc-truckersmp/releases/latest>
 
 ## Credits
 
-- @sunwinbus for the [original TPC implementation](https://github.com/sunwinbus/tpc-truckersmp) and motivating me to learn Go (lol)
-- @CoffeSiberian for the [Decrypt component](https://github.com/CoffeSiberian/DecryptTruck) used to decrypt game save files
+- [@sunwinbus](https://github.com/sunwinbus) for the [original TPC implementation](https://github.com/sunwinbus/tpc-truckersmp) and motivating me to learn Go (lol)
+- [@CoffeSiberian](https://github.com/CoffeSiberian) for the [Decrypt component](https://github.com/CoffeSiberian/DecryptTruck) used to decrypt game save files
 
 ## License
 
