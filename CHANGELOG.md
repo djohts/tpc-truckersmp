@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.10.0
+
+- add credits to readme
+- split decrypt utils into a separate package
+- replace decrypt with a more efficient and modern one
+- cleanup and optimise watcher code
+
+Overall the performance has been improved by ~60%, mostly thanks to the new decryptor.
+
 ## v2.9.4
 
 - Fix for save decrypting not working in some cases
