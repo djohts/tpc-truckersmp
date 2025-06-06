@@ -2,8 +2,6 @@ package utils
 
 import (
 	"bufio"
-	"bytes"
-	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -12,44 +10,34 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-//go:embed SII_Decrypt.exe
-var decrypt_bytes []byte
-
 func FormatPath(path string, parentPath string) string {
 	return fmt.Sprintf("...%s", strings.Replace(path, parentPath, "", 1))
 }
 
 func IsFile(path string) bool {
 	s, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	if s.IsDir() {
-		return false
-	}
-	return true
+	return err == nil && !s.IsDir()
 }
 
 func IsDir(path string) bool {
 	s, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	if s.IsDir() {
-		return true
-	}
-	return false
+	return err == nil && s.IsDir()
 }
 
 func GetDocumentsPath() (string, error) {
-	key, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders", registry.ALL_ACCESS)
+	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`, registry.QUERY_VALUE)
+	if err != nil {
+		return "", err
+	}
+	defer key.Close()
+
+	path, _, err := key.GetStringValue("Personal")
 	if err != nil {
 		return "", err
 	}
 
-	defer key.Close()
-	path, _, _ := key.GetStringValue("Personal")
-	path = strings.TrimSpace(strings.Replace(path, "%USERPROFILE%", os.Getenv("USERPROFILE"), -1))
+	path = strings.ReplaceAll(path, "%USERPROFILE%", os.Getenv("USERPROFILE"))
+	path = strings.TrimSpace(path)
 
 	return path, nil
 }
@@ -87,42 +75,4 @@ func Filter[T any](slice []T, filter func(*T) bool) []*T {
 	}
 
 	return ret
-}
-
-func EnsureDecrypt() *os.File {
-	if IsFile("SII_Decrypt.exe") {
-		data, err := os.ReadFile("SII_Decrypt.exe")
-		HandleError(err)
-
-		if !bytes.Equal(data, decrypt_bytes) {
-			err = os.Remove("SII_Decrypt.exe")
-			HandleError(err)
-
-			return installDecrypt()
-		}
-
-		f, err := os.OpenFile("SII_Decrypt.exe", os.O_RDWR, 0o755)
-		HandleError(err)
-
-		defer f.Close()
-
-		return f
-	}
-
-	return installDecrypt()
-}
-
-func installDecrypt() *os.File {
-	f, err := os.Create("SII_Decrypt.exe")
-	HandleError(err)
-
-	defer f.Close()
-
-	_, err = f.Write(decrypt_bytes)
-	HandleError(err)
-
-	err = f.Chmod(0o755)
-	HandleError(err)
-
-	return f
 }
