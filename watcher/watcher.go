@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -194,9 +193,6 @@ func addPathToWatch(watch *fsnotify.Watcher) error {
 }
 
 func watchFiles(watch *fsnotify.Watcher) {
-	var isOnCooldown bool
-	var mu sync.Mutex
-
 	for {
 		select {
 		case ev := <-watch.Events:
@@ -207,23 +203,27 @@ func watchFiles(watch *fsnotify.Watcher) {
 
 				base := filepath.Base(ev.Name)
 
-				if base == "quicksave" {
-					mu.Lock()
-					if isOnCooldown {
-						mu.Unlock()
-						continue
-					}
-					isOnCooldown = true
-					mu.Unlock()
+				switch base {
+				case "quicksave":
+					log.Debug("quicksave updated")
 
-					go func() {
-						time.Sleep(750 * time.Millisecond)
-						mu.Lock()
-						isOnCooldown = false
-						mu.Unlock()
+					const throttleDelay = 500 * time.Millisecond
+					func() {
+						timer := time.NewTimer(throttleDelay)
+						for {
+							select {
+							case ev2 := <-watch.Events:
+								if filepath.Base(ev2.Name) == "quicksave" && ev2.Op&fsnotify.Write == fsnotify.Write {
+									if !timer.Stop() {
+										<-timer.C
+									}
+									timer.Reset(throttleDelay)
+								}
+							case <-timer.C:
+								return
+							}
+						}
 					}()
-
-					time.Sleep(250 * time.Millisecond)
 
 					flushWatch := stopwatch.Start()
 					done, err := flushChange(filepath.Join(ev.Name, "game.sii"))
@@ -233,7 +233,7 @@ func watchFiles(watch *fsnotify.Watcher) {
 					if done {
 						log.Infof("Updated %s (%dms)", utils.FormatPath(filepath.Join(ev.Name, "game.sii"), constants.DocumentsPath), flushWatch.Milliseconds().Nanoseconds())
 					}
-				} else if base == "cams.txt" {
+				case "cams.txt":
 					err := keyboard.Type(config.Get().Keybinds.Quicksave)
 					utils.HandleError(err)
 					log.Info("Detected cams.txt update, sending quicksave keybind")
