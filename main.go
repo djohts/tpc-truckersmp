@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	log.SetTimeFormat("15:04:05")
 	fmt.Println("tpc-truckersmp", "version", constants.APP_VERSION, "by djohts")
 
 	log.Info("================= TPC For TruckersMP =================")
@@ -66,6 +67,8 @@ func main() {
 	if config.Get().Debug {
 		log.SetReportCaller(true)
 		log.SetLevel(log.DebugLevel)
+		log.Debug("Debug mode enabled")
+		log.SetTimeFormat("15:04:05.000")
 	}
 
 	if config.Get().Auto && config.Get().Keybinds.Quicksave == "" {
