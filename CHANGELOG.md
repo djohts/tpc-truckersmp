@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.10.1
+
+- Attempt to fix the app patching the save before it's been fully written by the game
+
 ## v2.10.0
 
 - add credits to readme
