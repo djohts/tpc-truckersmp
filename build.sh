@@ -1,1 +1,1 @@
-go build -o out/tpc-dev.exe -v -ldflags="-s -w" github.com/djohts/tpc-truckersmp
+go build -o out/tpc-dev.exe -v -trimpath -ldflags="-s -w" github.com/djohts/tpc-truckersmp

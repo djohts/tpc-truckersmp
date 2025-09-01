@@ -29,7 +29,7 @@ jobs:
           REF: ${{ github.ref }}
           GOOS: windows
           GOARCH: amd64
-        run: go build -o out/tpc.exe -v -ldflags="-s -w -X github.com/djohts/tpc-truckersmp/constants.APP_VERSION=${REF:11}" github.com/djohts/tpc-truckersmp
+        run: go build -o out/tpc.exe -v  -trimpath -ldflags="-s -w -X github.com/djohts/tpc-truckersmp/constants.APP_VERSION=${REF:11}" github.com/djohts/tpc-truckersmp
 
       - name: Extract changelog
         env:
