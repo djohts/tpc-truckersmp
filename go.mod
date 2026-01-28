@@ -13,7 +13,7 @@ require (
 	github.com/coreos/go-semver v0.3.1
 	github.com/creasty/defaults v1.8.0
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/google/go-github/v81 v81.0.0
+	github.com/google/go-github/v82 v82.0.0
 	golang.org/x/sys v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -31,7 +31,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
