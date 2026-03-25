@@ -207,7 +207,7 @@ func watchFiles(watch *fsnotify.Watcher) {
 				case "quicksave":
 					log.Debug("quicksave updated")
 
-					const throttleDelay = 500 * time.Millisecond
+					const throttleDelay = 250 * time.Millisecond
 					func() {
 						timer := time.NewTimer(throttleDelay)
 						for {
@@ -314,10 +314,18 @@ func editSii(siiArray []string, location, rotation string) string {
 	teleport := cfg.Teleport
 	refuelLevel := fmt.Sprintf("%d", cfg.RefuelRelative)
 
+	rot := "(" + rotation + ")"
 	myTruckNameless := ""
 	attachTrailerState := 0
 
-	for i := 0; i < len(siiArray); i++ {
+	var sb strings.Builder
+	sb.Grow(len(strings.Join(siiArray, "\n")) + 512)
+	push := func(s string) {
+		sb.WriteString(s)
+		sb.WriteByte('\n')
+	}
+
+	for i := range siiArray {
 		line := siiArray[i]
 
 		switch {
@@ -329,19 +337,23 @@ func editSii(siiArray []string, location, rotation string) string {
 
 		case strings.HasPrefix(line, " assigned_trailer_connected: false") && attachTrailerState == 1:
 			attachTrailerState = 2
-			siiArray[i] = " assigned_trailer_connected: true"
+			push(" assigned_trailer_connected: true")
 
 		case strings.HasPrefix(line, " nav_node_position:") && attachTrailerState == 2:
-			siiArray[i] = " nav_node_position: (0, 0, 0)"
+			push(" nav_node_position: (0, 0, 0)")
 
-		case strings.HasPrefix(line, " truck_placement:") && teleport:
-			siiArray[i] = " truck_placement: (" + location + ") (" + rotation + ")"
+		case strings.HasPrefix(line, " truck_placement:"):
+			if teleport {
+				push(" truck_placement: (" + location + ") " + rot)
+			} else {
+				rot = "(" + strings.Split(line, ") (")[1]
+			}
 
 		case strings.HasPrefix(line, " trailer_placement:") && (attachTrailerState == 2 || teleport):
-			siiArray[i] = " trailer_placement: (0, 0, 0) (" + rotation + ")"
+			push(" trailer_placement: (0, 0, 0) " + rot)
 
 		case strings.HasPrefix(line, " slave_trailer_placements[") && (attachTrailerState == 2 || teleport):
-			siiArray[i] = strings.Split(line, ": ")[0] + ": (0, 0, 0) (" + rotation + ")"
+			push(strings.Split(line, ": ")[0] + ": (0, 0, 0) " + rot)
 
 		case strings.HasPrefix(line, " trailer_body_wear:"),
 			strings.HasPrefix(line, " trailer_body_wear_unfixable:"),
@@ -355,16 +367,18 @@ func editSii(siiArray []string, location, rotation string) string {
 			strings.HasPrefix(line, " cabin_wear_unfixable:"),
 			strings.HasPrefix(line, " wheels_wear:"),
 			strings.HasPrefix(line, " wheels_wear_unfixable:"):
-			siiArray[i] = strings.Split(line, ":")[0] + ": 0"
+			push(strings.Split(line, ":")[0] + ": 0")
 
 		case strings.HasPrefix(line, " wheels_wear["),
 			strings.HasPrefix(line, " wheels_wear_unfixable["):
-			siiArray[i] = ""
+			continue
 
 		case strings.HasPrefix(line, " fuel_relative:") && refuel && i >= 7 && strings.Contains(siiArray[i-7], myTruckNameless):
-			siiArray[i] = " fuel_relative: " + refuelLevel
+			push(" fuel_relative: " + refuelLevel)
+		default:
+			push(line)
 		}
 	}
 
-	return strings.Join(siiArray, "\n")
+	return sb.String()
 }
