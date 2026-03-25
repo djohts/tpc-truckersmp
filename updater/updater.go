@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/charmbracelet/bubbles/progress"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/log"
+	"charm.land/bubbles/v2/progress"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/log/v2"
 	"github.com/coreos/go-semver/semver"
 	"github.com/djohts/tpc-truckersmp/constants"
 	"github.com/djohts/tpc-truckersmp/utils"
@@ -135,7 +135,7 @@ func DownloadFile(url, filename string) error {
 
 	m := model{
 		pw:       pw,
-		progress: progress.New(progress.WithDefaultGradient()),
+		progress: progress.New(progress.WithDefaultBlend()),
 	}
 	// Start Bubble Tea
 	p = tea.NewProgram(m)

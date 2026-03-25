@@ -12,9 +12,9 @@ import (
 	"syscall"
 	"time"
 
+	"charm.land/log/v2"
 	"git.tcp.direct/kayos/sendkeys"
 	"github.com/bradhe/stopwatch"
-	"github.com/charmbracelet/log"
 	"github.com/djohts/tpc-truckersmp/config"
 	"github.com/djohts/tpc-truckersmp/constants"
 	"github.com/djohts/tpc-truckersmp/decrypt"

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/log"
+	"charm.land/huh/v2"
+	"charm.land/log/v2"
 	"github.com/djohts/tpc-truckersmp/config"
 	"github.com/djohts/tpc-truckersmp/constants"
 	"github.com/djohts/tpc-truckersmp/updater"
