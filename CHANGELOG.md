@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.11.0
+
+- Now compiled with Go 1.26.1
+- Upgraded visual libraries
+- Upgraded decrypt component
+- Fixes & improvements to the save watcher (patcher)
+  - Prevent empty lines in the save file;
+  - Fixed an issue where the vehicle will occasionally clip into the ground if `attach_trailer` is on, `teleport` is off and trailer is not connected;
+  - Generic performance improvements.
+
 ## v2.10.1
 
 - Attempt to fix the app patching the save before it's been fully written by the game
