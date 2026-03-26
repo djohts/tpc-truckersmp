@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.11.1
+
+- Fixed save rewriter removing specific lines from the save
+
 ## v2.11.0
 
 - Now compiled with Go 1.26.1
