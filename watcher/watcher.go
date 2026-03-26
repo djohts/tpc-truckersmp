@@ -330,9 +330,11 @@ func editSii(siiArray []string, location, rotation string) string {
 
 		switch {
 		case strings.HasPrefix(line, " my_truck: _nameless"):
+			push(line)
 			myTruckNameless = strings.Split(line, ": ")[1]
 
 		case strings.HasPrefix(line, " assigned_trailer: _nameless") && attachTrailer:
+			push(line)
 			attachTrailerState = 1
 
 		case strings.HasPrefix(line, " assigned_trailer_connected: false") && attachTrailerState == 1:
@@ -346,6 +348,7 @@ func editSii(siiArray []string, location, rotation string) string {
 			if teleport {
 				push(" truck_placement: (" + location + ") " + rot)
 			} else {
+				push(line)
 				rot = "(" + strings.Split(line, ") (")[1]
 			}
 
