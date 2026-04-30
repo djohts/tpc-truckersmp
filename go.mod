@@ -12,7 +12,7 @@ require (
 	github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea
 	github.com/coreos/go-semver v0.3.1
 	github.com/creasty/defaults v1.8.0
-	github.com/fsnotify/fsnotify v1.9.0
+	github.com/fsnotify/fsnotify v1.10.0
 	github.com/google/go-github/v85 v85.0.0
 	golang.org/x/sys v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
