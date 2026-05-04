@@ -23,8 +23,8 @@ type Keybinds struct {
 type Features struct {
 	AttachTrailer bool `yaml:"attach_trailer" default:"true"`
 
-	Refuel         bool `yaml:"refuel" default:"false"`
-	RefuelRelative int  `yaml:"refuel_relative" default:"1"`
+	Refuel         bool    `yaml:"refuel" default:"false"`
+	RefuelRelative float64 `yaml:"refuel_relative" default:"1"`
 
 	Teleport bool `yaml:"teleport" default:"true"`
 }
