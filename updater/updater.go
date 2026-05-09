@@ -15,7 +15,7 @@ import (
 	"github.com/coreos/go-semver/semver"
 	"github.com/djohts/tpc-truckersmp/constants"
 	"github.com/djohts/tpc-truckersmp/utils"
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v86/github"
 )
 
 var p *tea.Program
