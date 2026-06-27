@@ -314,16 +314,23 @@ func editSii(siiArray []string, location, rotation string) string {
 	teleport := cfg.Teleport
 	refuelLevel := fmt.Sprintf("%f", cfg.RefuelRelative)
 
-	assignedVehiclesBlockId := getAssignedVehiclesBlockId(siiArray)
-	if assignedVehiclesBlockId == "" {
+	assignedVehiclesBlock := getAssignedVehiclesBlock(siiArray)
+	if assignedVehiclesBlock.Vehicle == "" {
 		log.Warn("No assigned vehicles block found, skipping edit")
 		return strings.Join(siiArray, "\n")
 	}
 	inAssignedVehiclesBlock := false
 
 	rot := "(" + rotation + ")"
-	myTruckNameless := ""
-	attachTrailerState := 0
+	truckNameless := assignedVehiclesBlock.Vehicle
+	truckRot := "(" + rotation + ")"
+	if !teleport {
+		truckRot = "(" + strings.Split(assignedVehiclesBlock.VehiclePlacement, ") (")[1]
+	}
+	hasTrailer := assignedVehiclesBlock.Trailer != ""
+	isTrailerAttached := assignedVehiclesBlock.TrailerAttached
+	shouldTrailerStraighten := hasTrailer && (attachTrailer || (teleport && isTrailerAttached))
+	shouldOverrideTrailer := hasTrailer && attachTrailer && !isTrailerAttached
 
 	var sb strings.Builder
 	sb.Grow(len(strings.Join(siiArray, "\n")) + 512)
@@ -336,38 +343,36 @@ func editSii(siiArray []string, location, rotation string) string {
 		line := siiArray[i]
 
 		switch {
-		case !inAssignedVehiclesBlock && strings.HasPrefix(line, "player_vehicles : "+assignedVehiclesBlockId):
+		case !inAssignedVehiclesBlock && strings.HasPrefix(line, "player_vehicles : "+assignedVehiclesBlock.Id):
 			push(line)
 			inAssignedVehiclesBlock = true
 
-		case inAssignedVehiclesBlock && strings.HasPrefix(line, "}"):
+		case inAssignedVehiclesBlock && line == "}":
 			push(line)
 			inAssignedVehiclesBlock = false
 
-		case inAssignedVehiclesBlock && strings.HasPrefix(line, " vehicle: _nameless"):
-			push(line)
-			myTruckNameless = strings.Split(line, ": ")[1]
-
-		case inAssignedVehiclesBlock && attachTrailer && strings.HasPrefix(line, " trailer: _nameless"):
-			push(line)
-			attachTrailerState = 1
-
-		case inAssignedVehiclesBlock && attachTrailerState == 1 && strings.HasPrefix(line, " stored_trailer_attached: false"):
-			attachTrailerState = 2
-			push(" stored_trailer_attached: true")
-
-		case inAssignedVehiclesBlock && strings.HasPrefix(line, " stored_vehicle_placement:"):
-			if teleport {
+		case inAssignedVehiclesBlock:
+			switch {
+			case teleport && strings.HasPrefix(line, " stored_vehicle_placement:"):
 				push(" stored_vehicle_placement: (" + location + ") " + rot)
-			} else {
+
+			case hasTrailer:
+				switch {
+				case attachTrailer && line == " stored_trailer_attached: false":
+					push(" stored_trailer_attached: true")
+
+				case shouldTrailerStraighten && strings.HasPrefix(line, " stored_trailer_placements["):
+					push(strings.Split(line, ") (")[0] + ") " + truckRot)
+
+				default:
+					push(line)
+				}
+
+			default:
 				push(line)
-				rot = "(" + strings.Split(line, ") (")[1]
 			}
 
-		case inAssignedVehiclesBlock && attachTrailerState == 2 && strings.HasPrefix(line, " stored_trailer_placements["):
-			push(strings.Split(line, ": ")[0] + ": (0, 0, 0) " + rot)
-
-		case attachTrailerState == 2 && strings.HasPrefix(line, " nav_node_position:"):
+		case shouldOverrideTrailer && strings.HasPrefix(line, " nav_node_position:"):
 			push(" nav_node_position: (0, 0, 0)")
 
 		case strings.HasPrefix(line, " trailer_body_wear:"),
@@ -388,7 +393,7 @@ func editSii(siiArray []string, location, rotation string) string {
 			strings.HasPrefix(line, " wheels_wear_unfixable["):
 			continue
 
-		case refuel && i >= 7 && strings.HasPrefix(line, " fuel_relative:") && strings.Contains(siiArray[i-7], myTruckNameless):
+		case refuel && i >= 7 && strings.HasPrefix(line, " fuel_relative:") && strings.Contains(siiArray[i-7], truckNameless):
 			push(" fuel_relative: " + refuelLevel)
 		default:
 			push(line)
