@@ -151,7 +151,7 @@ func DownloadFile(url, filename string) error {
 }
 
 func getLatestRelease() (*github.RepositoryRelease, error) {
-	client, err := github.NewClient(nil)
+	client, err := github.NewClient()
 	if err != nil {
 		return nil, err
 	}

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.12.1
+
+- Fixed updater crash
+
 ## v2.12.0
 
 - 1.60 support
