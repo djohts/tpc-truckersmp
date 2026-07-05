@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.12.0
+
+- 1.60 support
+- Actually fixed float refuel values
+- Dependency updates
+
 ## v2.11.1
 
 - Fixed save rewriter removing specific lines from the save
