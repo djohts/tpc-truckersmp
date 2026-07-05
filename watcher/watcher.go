@@ -6,18 +6,16 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	"charm.land/log/v2"
+	decryptgo "github.com/djohts/decrypt-go"
 	"git.tcp.direct/kayos/sendkeys"
 	"github.com/bradhe/stopwatch"
 	"github.com/djohts/tpc-truckersmp/config"
 	"github.com/djohts/tpc-truckersmp/constants"
-	"github.com/djohts/tpc-truckersmp/decrypt"
 	"github.com/djohts/tpc-truckersmp/utils"
 	"github.com/fsnotify/fsnotify"
 )
@@ -30,8 +28,6 @@ var (
 )
 
 func Init() {
-	decrypt.EnsureDecrypt()
-
 	if config.Get().Auto {
 		addCamsWatchers()
 
@@ -127,24 +123,22 @@ func getGamePath(game string) (string, error) {
 	return "", fmt.Errorf("%s not found", game)
 }
 
-func decryptSii(filePath string) (bool, error) {
-	decryptFile := decrypt.EnsureDecrypt()
-	execPath, err := filepath.Abs(decryptFile.Name())
-	utils.HandleError(err)
-
-	cmd := exec.Command(execPath, filePath)
-	log.Debugf("Decrypting %s", utils.FormatPath(filePath, constants.DocumentsPath))
-	buf, err := cmd.Output()
+func decryptAndReadSii(filePath string) ([]string, error) {
+	raw, err := os.ReadFile(filePath)
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			if exitErr.Sys().(syscall.WaitStatus).ExitStatus() == 1 {
-				return false, nil
-			}
-			return false, errors.New(string(buf))
-		}
-		return false, err
+		return nil, err
 	}
-	return true, nil
+	log.Debugf("Decrypting %s", utils.FormatPath(filePath, constants.DocumentsPath))
+	decrypted, err := decryptgo.DecryptBinFile(raw)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt %s: %w", filePath, err)
+	}
+	scanner := bufio.NewScanner(strings.NewReader(string(decrypted)))
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
 }
 
 func readFile(filePath string) ([]string, error) {
@@ -252,19 +246,8 @@ func flushChange(filePath string) (bool, error) {
 	if !utils.IsFile(filePath) {
 		return false, nil
 	}
-	needEdit, err := decryptSii(filePath)
-	if err != nil {
-		return false, err
-	}
-	if !needEdit {
-		log.Debug("No need to edit " + utils.FormatPath(filePath, constants.DocumentsPath))
-		return false, nil
-	}
 
-	if !utils.IsFile(filePath) {
-		return false, nil
-	}
-	sii, err := readFile(filePath)
+	sii, err := decryptAndReadSii(filePath)
 	if err != nil {
 		return false, err
 	}
