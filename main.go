@@ -43,9 +43,8 @@ func main() {
 		var update bool
 		var groups []*huh.Group
 
-		// Show changelogs oldest-first so reading top-to-bottom is chronological.
-		for i := len(changelogs) - 1; i >= 0; i-- {
-			cl := changelogs[i]
+		// Changelogs are returned oldest-first for chronological reading.
+		for _, cl := range changelogs {
 			groups = append(groups, huh.NewGroup(
 				huh.NewNote().
 					Title("Changelog "+cl.Tag).

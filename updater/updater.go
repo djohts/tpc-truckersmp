@@ -43,8 +43,8 @@ func CheckUpdates() (bool, string, error) {
 }
 
 // GetChangelogsBetween returns changelogs for all releases newer than the
-// currently installed version. Results are ordered newest-first (same order as
-// the GitHub API), so callers that want oldest-first should reverse the slice.
+// currently installed version, ordered oldest-first so callers can display
+// them in chronological order.
 func GetChangelogsBetween() ([]ReleaseChangelog, error) {
 	if constants.APP_VERSION == "dev" {
 		return nil, nil
@@ -73,6 +73,11 @@ func GetChangelogsBetween() ([]ReleaseChangelog, error) {
 			body := stripChecksumsSection(release.GetBody())
 			changelogs = append(changelogs, ReleaseChangelog{Tag: *release.TagName, Body: body})
 		}
+	}
+
+	// GitHub returns releases newest-first; reverse to oldest-first.
+	for i, j := 0, len(changelogs)-1; i < j; i, j = i+1, j-1 {
+		changelogs[i], changelogs[j] = changelogs[j], changelogs[i]
 	}
 
 	return changelogs, nil
@@ -118,7 +123,8 @@ func stripChecksumsSection(body string) string {
 	return strings.TrimSpace(strings.Join(result, "\n"))
 }
 
-func UpdateSelf() (bool, error) {	release, err := getLatestRelease()
+func UpdateSelf() (bool, error) {
+	release, err := getLatestRelease()
 	if err != nil {
 		return false, err
 	}
