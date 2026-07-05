@@ -35,8 +35,31 @@ func main() {
 	} else if needsUpdate {
 		log.Info("New version available", "current", constants.APP_VERSION, "latest", latest[1:])
 
+		changelogs, clErr := updater.GetChangelogsBetween()
+		if clErr != nil {
+			log.Warn("Failed to fetch changelogs", "error", clErr)
+		}
+
 		var update bool
-		form := huh.NewForm(huh.NewGroup(huh.NewConfirm().Title("Update?").Description("Do you want to update to the latest version?").Value(&update)))
+		var groups []*huh.Group
+
+		// Show changelogs oldest-first so reading top-to-bottom is chronological.
+		for i := len(changelogs) - 1; i >= 0; i-- {
+			cl := changelogs[i]
+			groups = append(groups, huh.NewGroup(
+				huh.NewNote().
+					Title("Changelog "+cl.Tag).
+					Description(cl.Body).
+					Next(true).
+					NextLabel("Next"),
+			))
+		}
+
+		groups = append(groups, huh.NewGroup(
+			huh.NewConfirm().Title("Update?").Description("Do you want to update to the latest version?").Value(&update),
+		))
+
+		form := huh.NewForm(groups...)
 		err := form.Run()
 		utils.HandleError(err)
 

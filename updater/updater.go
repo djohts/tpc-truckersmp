@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"charm.land/bubbles/v2/progress"
 	tea "charm.land/bubbletea/v2"
@@ -19,6 +20,12 @@ import (
 )
 
 var p *tea.Program
+
+// ReleaseChangelog holds the tag and cleaned body of a GitHub release.
+type ReleaseChangelog struct {
+	Tag  string
+	Body string
+}
 
 func CheckUpdates() (bool, string, error) {
 	if constants.APP_VERSION == "dev" {
@@ -35,8 +42,83 @@ func CheckUpdates() (bool, string, error) {
 	return needsUpdate, *release.TagName, nil
 }
 
-func UpdateSelf() (bool, error) {
-	release, err := getLatestRelease()
+// GetChangelogsBetween returns changelogs for all releases newer than the
+// currently installed version. Results are ordered newest-first (same order as
+// the GitHub API), so callers that want oldest-first should reverse the slice.
+func GetChangelogsBetween() ([]ReleaseChangelog, error) {
+	if constants.APP_VERSION == "dev" {
+		return nil, nil
+	}
+
+	client, err := github.NewClient()
+	if err != nil {
+		return nil, err
+	}
+	releases, _, err := client.Repositories.ListReleases(context.Background(), "djohts", "tpc-truckersmp", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	currentVersion := semver.New(constants.APP_VERSION)
+	var changelogs []ReleaseChangelog
+	for _, release := range releases {
+		if release.TagName == nil || len(*release.TagName) < 2 {
+			continue
+		}
+		tagVersion, err := semver.NewVersion((*release.TagName)[1:])
+		if err != nil {
+			continue
+		}
+		if currentVersion.LessThan(*tagVersion) {
+			body := stripChecksumsSection(release.GetBody())
+			changelogs = append(changelogs, ReleaseChangelog{Tag: *release.TagName, Body: body})
+		}
+	}
+
+	return changelogs, nil
+}
+
+// stripChecksumsSection removes any markdown heading whose text contains
+// "sha", "checksum", or "hash" (case-insensitive), along with all lines
+// that follow it until the next heading of the same or higher level.
+func stripChecksumsSection(body string) string {
+	lines := strings.Split(body, "\n")
+	var result []string
+	inChecksumsSection := false
+	checksumLevel := 0
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "#") {
+			level := 0
+			for _, ch := range trimmed {
+				if ch == '#' {
+					level++
+				} else {
+					break
+				}
+			}
+			headerText := strings.ToLower(strings.TrimSpace(trimmed[level:]))
+			if strings.Contains(headerText, "sha") || strings.Contains(headerText, "checksum") || strings.Contains(headerText, "hash") {
+				inChecksumsSection = true
+				checksumLevel = level
+				continue
+			}
+			// A heading at the same or higher level ends the checksums section.
+			if inChecksumsSection && level <= checksumLevel {
+				inChecksumsSection = false
+			}
+		}
+
+		if !inChecksumsSection {
+			result = append(result, line)
+		}
+	}
+
+	return strings.TrimSpace(strings.Join(result, "\n"))
+}
+
+func UpdateSelf() (bool, error) {	release, err := getLatestRelease()
 	if err != nil {
 		return false, err
 	}
