@@ -15,7 +15,7 @@ require (
 	github.com/djohts/decrypt-go v0.0.1
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/google/go-github/v88 v88.0.0
-	golang.org/x/sys v0.46.0
+	golang.org/x/sys v0.47.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
