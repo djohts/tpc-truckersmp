@@ -11,7 +11,7 @@ require (
 	git.tcp.direct/kayos/sendkeys v0.0.0-20211216174833-565f782ccf21
 	github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea
 	github.com/coreos/go-semver v0.3.1
-	github.com/creasty/defaults v1.8.0
+	github.com/creasty/defaults v1.9.0
 	github.com/djohts/decrypt-go v0.0.1
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/google/go-github/v90 v90.0.0
